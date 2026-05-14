@@ -22,7 +22,7 @@ export default class ParallelCoordsView {
 	}
 
 	_buildAttrs(attrs) {
-		return [...attrs.slice(0, 5).map(a => a === 'absences' ? 'absences_levels' : a), data.finalAttr];
+		return [...attrs, data.targetAttr];
 	}
 
 	async init() {

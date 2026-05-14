@@ -2,7 +2,7 @@
 export const data = {
 	csvPath: 'data/student-por-processed.csv',
 	defaultAttrs: ['studytime', 'failures', 'absences_levels', 'schoolsup', 'paid'],
-	finalAttr: 'final_grade_levels',
+	targetAttr: 'final_grade_levels',
 };
 
 // SVG viewport dimensions and CSS framing
