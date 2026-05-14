@@ -1,4 +1,5 @@
-import PCDataProcessor from './PCDataProcessor.js';
+import { loadCSV } from '../../../src/model/DataLoader.js';
+import DataProcessor from '../../../src/model/DataProcessor.js';
 import PCAxisManager from './PCAxisManager.js';
 import { PCNodeRenderer } from './PCNodeRenderer.js';
 import PCLegend from './PCLegend.js';
@@ -27,8 +28,8 @@ export default class PCView {
 	}
 
 	async init() {
-		const data = await d3.csv('data/student-por-processed.csv');
-		this.dataProcessor = new PCDataProcessor(data);
+		const samples = await loadCSV('data/student-por-processed.csv', { idColumn: 'id' });
+		this.dataProcessor = new DataProcessor(samples);
 
 		// Design width matches what PCAxisManager uses for its internal coordinate system.
 		// Using viewBox + CSS width lets the SVG scale to any viewport without re-computing

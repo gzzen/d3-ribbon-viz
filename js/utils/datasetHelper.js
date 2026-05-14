@@ -1,4 +1,4 @@
-const map = await fetch(new URL('./labelMap.json', import.meta.url)).then(r => r.json());
+const map = await fetch(new URL('../../data/label.json', import.meta.url)).then(r => r.json());
 
 // get the human-readable label for an attribute
 // e.g. getAttrLabel("failures") => "Number of past class failures"
