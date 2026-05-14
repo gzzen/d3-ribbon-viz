@@ -1,4 +1,4 @@
-import { overlay as overlayCfg } from '../../../config.js';
+import { overlay as overlayCfg } from '../config.js';
 import { isRelated } from '../ribbon/keys.js';
 
 /** Pure SVG renderer for ribbon highlight/dim states. Holds no mutable state. */

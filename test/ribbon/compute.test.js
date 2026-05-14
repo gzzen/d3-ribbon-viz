@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { computeAllRibbons } from '../../../../js/views/parallelCoords/ribbon/compute.js';
-import { AXIS_HEIGHT } from '../../../../js/views/parallelCoords/layout.js';
-import { AxisLayout, NodeLayout } from '../../../../js/views/parallelCoords/utils.js';
+import { computeAllRibbons } from '../../src/ribbon/compute.js';
+import { AXIS_HEIGHT } from '../../src/layout.js';
+import { AxisLayout, NodeLayout } from '../../src/utils.js';
 
 const colorFn = () => '#abc';
 

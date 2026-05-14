@@ -1,6 +1,6 @@
-import { loadCSV } from '../../../src/model/DataLoader.js';
-import DataProcessor from '../../../src/model/DataProcessor.js';
-import * as metadata from '../../utils/metadata.js';
+import { loadCSV } from './model/DataLoader.js';
+import DataProcessor from './model/DataProcessor.js';
+import * as metadata from './utils/metadata.js';
 import AxisRenderer from './render/axes.js';
 import { computeLayouts } from './layout.js';
 import { NodeRenderer } from './render/nodes.js';
@@ -12,7 +12,7 @@ import InteractionState from './interaction/state.js';
 import OverlayRenderer from './interaction/overlay.js';
 import NodeHandlers from './interaction/handlers/node.js';
 import { RibbonHoverHandler, RibbonClickHandler } from './interaction/handlers/ribbon.js';
-import { data, viewport } from '../../config.js';
+import { data, viewport } from './config.js';
 
 export default class ParallelCoordsView {
 

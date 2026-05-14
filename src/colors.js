@@ -1,4 +1,4 @@
-import { getAttrType, getCategories, getNumericRange } from '../../utils/metadata.js';
+import { getAttrType, getCategories, getNumericRange } from './utils/metadata.js';
 
 function buildNumericColorScale(attr) {
 	const range = getNumericRange(attr);

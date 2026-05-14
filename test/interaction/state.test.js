@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import InteractionState from '../../../../js/views/parallelCoords/interaction/state.js';
+import InteractionState from '../../src/interaction/state.js';
 
 function makeState() { return new InteractionState(); }
 

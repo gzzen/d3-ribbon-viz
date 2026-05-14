@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import DataProcessor from '../../src/model/DataProcessor.js';
 
 // Mock label helper so tests don't need the real label.json or a running server
-vi.mock('../../js/utils/metadata.js', () => ({
+vi.mock('../../src/utils/metadata.js', () => ({
 	// numeric: score 0–4
 	getNumericRange: vi.fn(attr => (attr === 'score' ? ['0', '1', '2', '3', '4'] : null)),
 	// categorical / ordinal

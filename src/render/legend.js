@@ -1,7 +1,7 @@
-import { getAttrLabel, getAttrType, getLabel, getCategories, getNumericRange } from '../../../utils/metadata.js';
+import { getAttrLabel, getAttrType, getLabel, getCategories, getNumericRange } from '../utils/metadata.js';
 import { buildColorScale } from '../colors.js';
 import { wrapLabel } from '../utils.js';
-import { legend as legendCfg } from '../../../config.js';
+import { legend as legendCfg } from '../config.js';
 
 export default class Legend {
 

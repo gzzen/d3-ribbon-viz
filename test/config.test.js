@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { data, viewport, axis, node, ribbon, overlay, legend } from '../js/config.js';
+import { data, viewport, axis, node, ribbon, overlay, legend } from '../src/config.js';
 
 describe('config', () => {
 

@@ -1,5 +1,5 @@
 import { NodeLayout, AxisLayout } from './utils.js';
-import { axis, viewport } from '../../config.js';
+import { axis, viewport } from './config.js';
 
 const AXIS_TOP = axis.marginTop + axis.paddingInner;
 const AXIS_BOTTOM = viewport.height - axis.marginBottom - axis.paddingInner;

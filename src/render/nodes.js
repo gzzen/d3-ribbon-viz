@@ -1,7 +1,7 @@
-import { getLabel } from '../../../utils/metadata.js';
+import { getLabel } from '../utils/metadata.js';
 import { buildColorScale } from '../colors.js';
 import { isSelectionActive } from '../utils.js';
-import { node as nodeCfg } from '../../../config.js';
+import { node as nodeCfg } from '../config.js';
 
 export class NodeRenderer {
 

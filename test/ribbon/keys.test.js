@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseKey, buildKey, isRelated, matchingKeys } from '../../../../js/views/parallelCoords/ribbon/keys.js';
+import { parseKey, buildKey, isRelated, matchingKeys } from '../../src/ribbon/keys.js';
 
 // helpers
 const seg = (attr, value) => ({ attr, value });

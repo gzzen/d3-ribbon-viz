@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { computeLayouts, AXIS_HEIGHT } from '../../../js/views/parallelCoords/layout.js';
-import { axis, viewport } from '../../../js/config.js';
+import { computeLayouts, AXIS_HEIGHT } from '../src/layout.js';
+import { axis, viewport } from '../src/config.js';
 
 // Fixed view width so tests are viewport-independent.
 const VIEW_WIDTH = 1000;

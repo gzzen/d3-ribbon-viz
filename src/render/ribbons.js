@@ -1,7 +1,7 @@
 import { computeAllRibbons } from '../ribbon/compute.js';
 import { parseKey } from '../ribbon/keys.js';
 import { isSelectionActive } from '../utils.js';
-import { ribbon as ribbonCfg } from '../../../config.js';
+import { ribbon as ribbonCfg } from '../config.js';
 
 export default class RibbonRenderer {
 

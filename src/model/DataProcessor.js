@@ -1,4 +1,4 @@
-import { getCategories, getNumericRange } from '../../js/utils/metadata.js';
+import { getCategories, getNumericRange } from '../utils/metadata.js';
 
 export default class DataProcessor {
 
