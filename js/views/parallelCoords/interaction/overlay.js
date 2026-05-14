@@ -1,13 +1,11 @@
 import { overlay as overlayCfg } from '../../../config.js';
 import { isRelated } from '../ribbon/keys.js';
 
+/** Pure SVG renderer for ribbon highlight/dim states. Holds no mutable state. */
 export default class OverlayRenderer {
 
 	constructor(ribbonRenderer) {
 		this.ribbonRenderer = ribbonRenderer;
-		this.frozen = false;
-		this.frozenKey = null;
-		this.frozenKeys = [];
 	}
 
 	applyH(ribbonKey) {
@@ -32,6 +30,7 @@ export default class OverlayRenderer {
 			});
 	}
 
+	/** Restore ribbons to their base rendered state (respecting isHighlighted flag). */
 	clearH() {
 		this.ribbonRenderer.ribbonGroup
 			.selectAll('path.ribbon')
@@ -42,35 +41,4 @@ export default class OverlayRenderer {
 			});
 	}
 
-	freeze(ribbonKey) {
-		this.frozen = true;
-		this.frozenKey = ribbonKey;
-		this.frozenKeys = [];
-	}
-
-	freezeMultiple(ribbonKeys) {
-		this.frozen = true;
-		this.frozenKey = null;
-		this.frozenKeys = ribbonKeys;
-	}
-
-	unfreeze() {
-		this.frozen = false;
-		this.frozenKey = null;
-		this.frozenKeys = [];
-		this.clearH();
-	}
-
-	isFrozen() {
-		return this.frozen;
-	}
-
-	isFrozenRelated(ribbonKey) {
-		if (!this.frozen) return false;
-		if (this.frozenKey) return isRelated(ribbonKey, this.frozenKey);
-		return this.frozenKeys.some(k => isRelated(ribbonKey, k));
-	}
-
 }
-
-

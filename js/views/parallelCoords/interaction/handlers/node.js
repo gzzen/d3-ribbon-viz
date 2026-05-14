@@ -9,8 +9,8 @@ import { matchingKeys } from '../../ribbon/keys.js';
  */
 export default class NodeHandlers {
 
-	constructor(selectionManager, overlayRenderer, ribbonRenderer) {
-		this.selectionManager = selectionManager;
+	constructor(state, overlayRenderer, ribbonRenderer) {
+		this.state = state;
 		this.overlayRenderer = overlayRenderer;
 		this.ribbonRenderer = ribbonRenderer;
 	}
@@ -19,7 +19,7 @@ export default class NodeHandlers {
 	// ── Hover ─────────────────────────────────────────────────────────────────
 
 	onMouseover(attr, value, selection) {
-		if (this.overlayRenderer.isFrozen()) return;
+		if (this.state.isFrozen()) return;
 		const constraints = this._mergeHoverIntoSelection(attr, value, selection);
 		const keys = matchingKeys(this._allRibbonKeys(), constraints);
 		if (keys.length === 0) {
@@ -30,7 +30,7 @@ export default class NodeHandlers {
 	}
 
 	onMouseout() {
-		if (this.overlayRenderer.isFrozen()) return;
+		if (this.state.isFrozen()) return;
 		this.overlayRenderer.clearH();
 	}
 
@@ -38,22 +38,24 @@ export default class NodeHandlers {
 	// ── Click ─────────────────────────────────────────────────────────────────
 
 	onClick(attr, value) {
-		this.selectionManager.toggle(attr, value);
-		const selection = this.selectionManager.getSelection();
+		this.state.toggle(attr, value);
+		const selection = this.state.getSelection();
 
-		if (!this.selectionManager.hasSelection()) {
-			this.overlayRenderer.unfreeze();
+		if (!this.state.hasSelection()) {
+			this.state.unfreeze();
+			this.overlayRenderer.clearH();
 			return;
 		}
 
 		const keys = matchingKeys(this._allRibbonKeys(), selection);
 		if (keys.length === 0) {
-			this.overlayRenderer.unfreeze();
+			this.state.unfreeze();
+			this.overlayRenderer.clearH();
 			return;
 		}
 
 		this.overlayRenderer.applyHMultiple(keys);
-		this.overlayRenderer.freezeMultiple(keys);
+		this.state.freeze(keys);
 	}
 
 
