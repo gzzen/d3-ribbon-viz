@@ -48,3 +48,25 @@ h1 {
 svg {
 	max-width: 100%;
 }
+
+.pc-tooltip {
+	position: absolute;
+	background: rgba(0,0,0,0.75);
+	color: #fff;
+	padding: 6px 10px;
+	border-radius: 4px;
+	font-size: 12px;
+	pointer-events: none;
+	display: none;
+}
+
+.axis-line {
+	stroke: #ffffff00;
+	stroke-width: 1.5;
+}
+
+.axis-label {
+	font-size: 13px;
+	fill: #222;
+	text-anchor: middle;
+}
