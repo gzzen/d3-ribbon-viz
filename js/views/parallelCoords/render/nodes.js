@@ -5,8 +5,7 @@ import { node as nodeCfg } from '../../../config.js';
 
 export class NodeRenderer {
 
-	constructor(vis, axisManager) {
-		this.axisManager = axisManager;
+	constructor(vis) {
 		this.nodeGroup = vis.append('g').attr('class', 'node-group');
 		this.colorScales = {};
 
@@ -16,13 +15,14 @@ export class NodeRenderer {
 		this.tooltip = d3.select('body').append('div').attr('class', 'pc-tooltip');
 	}
 
-	init() {
-		this._setAxisColorScale();
+	init(layouts) {
+		this._layouts = layouts;
+		this._setAxisColorScale(layouts);
 		this.render({});
 	}
 
 	update(selection) {
-		this._setAxisColorScale();
+		this._setAxisColorScale(this._layouts);
 		this.render(selection);
 	}
 
@@ -31,7 +31,7 @@ export class NodeRenderer {
 
 		const axisGroups = this.nodeGroup
 			.selectAll('g.node-axis')
-			.data(this.axisManager.axisLayouts, d => d.attr);
+			.data(this._layouts, d => d.attr);
 
 		axisGroups.exit().remove();
 
@@ -119,9 +119,9 @@ export class NodeRenderer {
 			});
 	}
 
-	_setAxisColorScale() {
+	_setAxisColorScale(layouts) {
 		this.colorScales = {};
-		for (const layout of this.axisManager.axisLayouts) {
+		for (const layout of layouts) {
 			this.colorScales[layout.attr] = buildColorScale(layout.attr);
 		}
 	}

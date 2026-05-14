@@ -1,17 +1,17 @@
-import { AXIS_HEIGHT } from './axes.js';
+import { AXIS_HEIGHT } from '../layout.js';
 import { isSelectionActive, RibbonData } from '../utils.js';
 import { ribbon as ribbonCfg } from '../../../config.js';
 
 export default class RibbonRenderer {
 
-	constructor(vis, axisManager, dataProcessor) {
-		this.axisManager = axisManager;
+	constructor(vis, dataProcessor) {
 		this.dataProcessor = dataProcessor;
 		this.ribbonGroup = vis.insert('g', '.node-group').attr('class', 'ribbon-group');
 	}
 
-	init(colorScales) {
+	init(colorScales, layouts) {
 		this.colorScales = colorScales;
+		this._layouts = layouts;
 		this.render({});
 	}
 
@@ -21,7 +21,7 @@ export default class RibbonRenderer {
 	}
 
 	render(selection) {
-		const layouts = this.axisManager.axisLayouts;
+		const layouts = this._layouts;
 		const isActive = isSelectionActive(selection);
 		const allRibbons = [];
 		let sampleGroups = new Map([['', this.dataProcessor.samples]]);

@@ -1,7 +1,8 @@
 import { loadCSV } from '../../../src/model/DataLoader.js';
 import DataProcessor from '../../../src/model/DataProcessor.js';
 import * as metadata from '../../utils/metadata.js';
-import AxisManager from './render/axes.js';
+import AxisRenderer from './render/axes.js';
+import { computeLayouts } from './layout.js';
 import { NodeRenderer } from './render/nodes.js';
 import Legend from './render/legend.js';
 import RibbonRenderer from './render/ribbons.js';
@@ -40,10 +41,10 @@ export default class ParallelCoordsView {
 			.style('height', 'auto')
 			.style('margin-left', viewport.svgMarginLeft);
 
-		this.axisManager = new AxisManager(svg);
+		this.axisRenderer = new AxisRenderer(svg);
 		this.legend = new Legend(svg);
-		this.nodeRenderer = new NodeRenderer(svg, this.axisManager);
-		this.ribbonRenderer = new RibbonRenderer(svg, this.axisManager, this.dataProcessor);
+		this.nodeRenderer = new NodeRenderer(svg);
+		this.ribbonRenderer = new RibbonRenderer(svg, this.dataProcessor);
 
 		this.render();
 
@@ -82,15 +83,18 @@ export default class ParallelCoordsView {
 			freqMap.set(attr, this.dataProcessor.computeNodeFrequencies(attr));
 		}
 
-		this.axisManager.init(this.displayAttrs, freqMap);
+		const viewWidth = window.innerWidth - viewport.rightPad - viewport.sidebarWidth;
+		const layouts = computeLayouts(this.displayAttrs, freqMap, viewWidth);
+
+		this.axisRenderer.render(layouts);
 		if (!this._legendInitialized) {
-			this.legend.init(this.axisManager.axisLayouts);
+			this.legend.init(layouts);
 			this._legendInitialized = true;
 		} else {
-			this.legend.update(this.axisManager.axisLayouts);
+			this.legend.update(layouts);
 		}
-		this.nodeRenderer.init();
-		this.ribbonRenderer.init(this.nodeRenderer.colorScales);
+		this.nodeRenderer.init(layouts);
+		this.ribbonRenderer.init(this.nodeRenderer.colorScales, layouts);
 	}
 
 }
