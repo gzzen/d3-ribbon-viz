@@ -1,3 +1,5 @@
+import { parseKey } from '../ribbon/keys.js';
+
 // Tooltip display — styles live in css/style.css under .pc-tooltip
 export default class Tooltip {
 
@@ -26,27 +28,14 @@ export default class Tooltip {
 // ── Tooltip content builder ───────────────────────────────────────────────────
 
 export function buildTooltipContent(ribbonKey, dataProcessor) {
-	const segments = ribbonKey.split('||');
-	const constraints = {};
+	const segments = parseKey(ribbonKey);
+	const constraints = Object.fromEntries(segments.map(({ attr, value }) => [attr, value]));
 
-	for (const segment of segments) {
-		const colonIdx = segment.indexOf(':');
-		constraints[segment.slice(0, colonIdx)] = segment.slice(colonIdx + 1);
-	}
+	const count = dataProcessor.samples.filter(sample =>
+		Object.entries(constraints).every(([attr, value]) => sample[attr] === value)
+	).length;
 
-	let count = 0;
-	for (const sample of dataProcessor.samples) {
-		let match = true;
-		for (const attr in constraints) {
-			if (sample[attr] !== constraints[attr]) { match = false; break; }
-		}
-		if (match) count++;
-	}
-
-	const lines = segments.map(seg => {
-		const colonIdx = seg.indexOf(':');
-		return `<b>${seg.slice(0, colonIdx)}</b> = ${seg.slice(colonIdx + 1)}`;
-	});
+	const lines = segments.map(({ attr, value }) => `<b>${attr}</b> = ${value}`);
 	lines.push(`Count: ${count}`);
 	return lines.join('<br>');
 }

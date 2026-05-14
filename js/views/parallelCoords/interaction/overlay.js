@@ -1,4 +1,5 @@
 import { overlay as overlayCfg } from '../../../config.js';
+import { isRelated } from '../ribbon/keys.js';
 
 export default class OverlayRenderer {
 
@@ -13,7 +14,7 @@ export default class OverlayRenderer {
 		this.ribbonRenderer.ribbonGroup
 			.selectAll('path.ribbon')
 			.each(function (d) {
-				const highlighted = _isRelated(d.key, ribbonKey);
+				const highlighted = isRelated(d.key, ribbonKey);
 				d3.select(this)
 					.attr('fill', highlighted ? d.color : overlayCfg.greyColor)
 					.attr('opacity', highlighted ? overlayCfg.highlightOpacity : overlayCfg.dimmedOpacity);
@@ -24,7 +25,7 @@ export default class OverlayRenderer {
 		this.ribbonRenderer.ribbonGroup
 			.selectAll('path.ribbon')
 			.each(function (d) {
-				const highlighted = ribbonKeys.some(k => _isRelated(d.key, k));
+				const highlighted = ribbonKeys.some(k => isRelated(d.key, k));
 				d3.select(this)
 					.attr('fill', highlighted ? d.color : overlayCfg.greyColor)
 					.attr('opacity', highlighted ? overlayCfg.highlightOpacity : overlayCfg.dimmedOpacity);
@@ -66,16 +67,10 @@ export default class OverlayRenderer {
 
 	isFrozenRelated(ribbonKey) {
 		if (!this.frozen) return false;
-		if (this.frozenKey) return _isRelated(ribbonKey, this.frozenKey);
-		return this.frozenKeys.some(k => _isRelated(ribbonKey, k));
+		if (this.frozenKey) return isRelated(ribbonKey, this.frozenKey);
+		return this.frozenKeys.some(k => isRelated(ribbonKey, k));
 	}
 
 }
 
 
-function _isRelated(candidateKey, sourceKey) {
-	if (candidateKey === sourceKey) return true;
-	if (sourceKey.startsWith(candidateKey + '||')) return true;
-	if (candidateKey.startsWith(sourceKey + '||')) return true;
-	return false;
-}

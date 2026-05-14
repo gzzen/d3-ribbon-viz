@@ -79,14 +79,14 @@ export class NodeRenderer {
 			.attr('filter', 'none');
 	}
 
-	attachInteractionHandlers(clickHandler, hoverHandler, getSelection) {
+	attachInteractionHandlers(handler, getSelection) {
 		const tooltip = this.tooltip;
 
 		this.nodeGroup.selectAll('rect.node')
 			.on('click', (event, d) => {
 				event.stopPropagation();
 				const attr = d3.select(event.currentTarget.parentNode).datum().attr;
-				clickHandler.onClick(attr, d.value);
+				handler.onClick(attr, d.value);
 			})
 			.on('mouseover', (event, d) => {
 				const attr = d3.select(event.currentTarget.parentNode).datum().attr;
@@ -100,7 +100,7 @@ export class NodeRenderer {
 					.attr('filter', `url(#${nodeCfg.hoverFilterId})`);
 
 				tooltip.style('display', 'block').text(getLabel(attr, d.value));
-				hoverHandler.onMouseover(attr, d.value, getSelection());
+				handler.onMouseover(attr, d.value, getSelection());
 			})
 			.on('mousemove', (event) => {
 				tooltip
@@ -115,7 +115,7 @@ export class NodeRenderer {
 
 				d3.select(event.currentTarget).attr('filter', 'none');
 				tooltip.style('display', 'none');
-				hoverHandler.onMouseout();
+				handler.onMouseout();
 			});
 	}
 

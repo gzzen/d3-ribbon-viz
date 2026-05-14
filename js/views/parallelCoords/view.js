@@ -9,8 +9,7 @@ import Tooltip from './interaction/tooltip.js';
 import BackgroundClickHandler from './interaction/handlers/background.js';
 import SelectionManager from './interaction/selectionManager.js';
 import OverlayRenderer from './interaction/overlay.js';
-import NodeHoverHandler from './interaction/handlers/nodeHover.js';
-import NodeClickHandler from './interaction/handlers/nodeClick.js';
+import NodeHandlers from './interaction/handlers/node.js';
 import { RibbonHoverHandler, RibbonClickHandler } from './interaction/handlers/ribbon.js';
 import { data, viewport } from '../../config.js';
 
@@ -54,28 +53,26 @@ export default class ParallelCoordsView {
 			this.nodeRenderer.update(selMgr.getSelection());
 		});
 		const overlayRenderer = new OverlayRenderer(this.ribbonRenderer);
-		const nodeHover = new NodeHoverHandler(overlayRenderer, this.ribbonRenderer);
-		const nodeClick = new NodeClickHandler(selMgr, overlayRenderer, nodeHover);
+		const nodeHandlers = new NodeHandlers(selMgr, overlayRenderer, this.ribbonRenderer);
 		const ribbonHover = new RibbonHoverHandler(overlayRenderer, tooltip, this.dataProcessor);
 		const ribbonClick = new RibbonClickHandler(overlayRenderer);
 
 		bgClick.register(() => selMgr.clear());
 		bgClick.register(() => overlayRenderer.unfreeze());
 
-		this._nodeClick = nodeClick;
-		this._nodeHover = nodeHover;
+		this._nodeHandlers = nodeHandlers;
 		this._selMgr = selMgr;
 		this._ribbonHover = ribbonHover;
 		this._ribbonClick = ribbonClick;
 
-		this.nodeRenderer.attachInteractionHandlers(nodeClick, nodeHover, () => selMgr.getSelection());
+		this.nodeRenderer.attachInteractionHandlers(nodeHandlers, () => selMgr.getSelection());
 		this.ribbonRenderer.attachInteractionHandlers(ribbonHover, ribbonClick);
 	}
 
 	update(attrs) {
 		this.displayAttrs = this._buildAttrs(attrs);
 		this.render();
-		this.nodeRenderer.attachInteractionHandlers(this._nodeClick, this._nodeHover, () => this._selMgr.getSelection());
+		this.nodeRenderer.attachInteractionHandlers(this._nodeHandlers, () => this._selMgr.getSelection());
 		this.ribbonRenderer.attachInteractionHandlers(this._ribbonHover, this._ribbonClick);
 	}
 
