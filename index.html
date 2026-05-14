@@ -15,10 +15,10 @@
         </div>
     </div>
 
-    <script src="js/d3.v6.min.js"></script>
+    <script src="src/d3.v6.min.js"></script>
     <script type="module">
-        import PCView from './js/views/viewOnePC/PCView.js';
-        const pcView = new PCView('#pc-view');
+        import ParallelCoordsView from './src/view.js';
+        const pcView = new ParallelCoordsView('#pc-view');
         pcView.init();
     </script>
 </body>
