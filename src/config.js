@@ -1,7 +1,7 @@
 // Data source
 export const data = {
 	csvPath: 'data/student-por-processed.csv',
-	defaultAttrs: ['studytime', 'failures', 'absences_levels', 'schoolsup', 'paid'],
+	defaultAttrs: ['studytime', 'failures', 'schoolsup', 'paid'],
 	targetAttr: 'final_grade_levels',
 };
 

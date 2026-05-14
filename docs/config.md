@@ -11,7 +11,7 @@ Controls the data source and which attributes are displayed by default.
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | `csvPath` | `string` | `'data/student-por-processed.csv'` | Path to the dataset CSV, relative to the page URL |
-| `defaultAttrs` | `string[]` | `['studytime', 'failures', 'absences_levels', 'schoolsup', 'paid']` | Axes shown on initial load (left to right, excluding the final attribute) |
+| `defaultAttrs` | `string[]` | `['studytime', 'failures', 'schoolsup', 'paid']` | Axes shown on initial load (left to right, excluding the final attribute) |
 | `targetAttr` | `string` | `'final_grade_levels'` | Rightmost axis — always appended after `defaultAttrs` |
 
 ---
