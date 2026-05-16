@@ -10,6 +10,7 @@
 <body>
     <div class="container">
         <h1>Student Performance Factors</h1>
+        <div id="attr-selector"></div>
         <div id="pc-view">
             <div class="view-label view1">Pathways Between Student Characteristics and Final Grade</div>
         </div>
@@ -18,8 +19,24 @@
     <script src="src/d3.v6.min.js"></script>
     <script type="module">
         import ParallelCoordsView from './src/view.js';
+        import SelectorState from './src/ui/selectorState.js';
+        import AttributeSelector from './src/ui/attributeSelector.js';
+        import * as metadata from './src/utils/metadata.js';
+        import { data } from './src/config.js';
+
         const pcView = new ParallelCoordsView('#pc-view');
-        pcView.init();
+        await pcView.init(); // metadata.init() is called inside; safe to use metadata after this
+
+        const allAttrs = metadata.getAllAttrs().filter(a => a !== data.targetAttr);
+        const selectorState = new SelectorState(allAttrs, data.defaultAttrs);
+
+        new AttributeSelector(
+            document.querySelector('#attr-selector'),
+            selectorState,
+            attr => metadata.getAttrLabel(attr),
+        );
+
+        selectorState.on(() => pcView.update(selectorState.getActive()));
     </script>
 </body>
 </html>
