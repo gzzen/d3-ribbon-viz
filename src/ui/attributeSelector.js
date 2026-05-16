@@ -98,6 +98,7 @@ export default class AttributeSelector {
 		box.className = ['attr-box', 'attr-box--active', isLast ? 'attr-box--last' : '']
 			.filter(Boolean).join(' ');
 		box.textContent = this._labelFn(attr);
+		box.title = this._labelFn(attr);
 		box.dataset.attr = attr;
 		box.draggable = true;
 
@@ -123,6 +124,7 @@ export default class AttributeSelector {
 		box.className = ['attr-box', 'attr-box--inactive', isDisabled ? 'attr-box--disabled' : '']
 			.filter(Boolean).join(' ');
 		box.textContent = this._labelFn(attr);
+		box.title = this._labelFn(attr);
 		box.dataset.attr = attr;
 
 		if (isDisabled) {
