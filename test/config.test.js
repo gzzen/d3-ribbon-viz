@@ -12,9 +12,9 @@ describe('config', () => {
 			expect(Array.isArray(data.defaultAttrs)).toBe(true);
 			expect(data.defaultAttrs.length).toBeGreaterThan(0);
 		});
-		it('has a finalAttr string not in defaultAttrs', () => {
-			expect(data.finalAttr).toBeTypeOf('string');
-			expect(data.defaultAttrs).not.toContain(data.finalAttr);
+		it('has a targetAttr string not in defaultAttrs', () => {
+			expect(data.targetAttr).toBeTypeOf('string');
+			expect(data.defaultAttrs).not.toContain(data.targetAttr);
 		});
 	});
 
