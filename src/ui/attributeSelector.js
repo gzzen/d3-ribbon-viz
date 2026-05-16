@@ -1,10 +1,13 @@
 /**
- * Attribute selector strip — renders the active/inactive attribute boxes and
- * wires click and drag-to-reorder interactions to a SelectorState instance.
+ * Attribute selector strip.
  *
- * Not unit-tested: it is a thin DOM layer over SelectorState, which is fully
- * tested independently.
+ * Active group: fixed, full set always visible, drag-to-reorder.
+ * Inactive group: paged — INACTIVE_PAGE items shown at a time,
+ *   navigated with ← / → buttons.
  */
+
+const INACTIVE_PAGE = 5;
+
 export default class AttributeSelector {
 
 	/**
@@ -16,9 +19,15 @@ export default class AttributeSelector {
 		this._container = container;
 		this._state = state;
 		this._labelFn = labelFn;
+		this._offset = 0;       // index of first visible inactive attr
 		this._dragSrcIdx = null;
 
-		state.on(() => this._render());
+		state.on(() => {
+			// clamp offset so it stays valid after the inactive list shrinks
+			const max = Math.max(0, this._state.getInactive().length - INACTIVE_PAGE);
+			this._offset = Math.min(this._offset, max);
+			this._render();
+		});
 		this._render();
 	}
 
@@ -32,60 +41,94 @@ export default class AttributeSelector {
 		row.className = 'attr-selector';
 
 		row.append(
-			this._buildGroup('active'),
+			this._buildActiveGroup(),
 			this._buildDivider(),
-			this._buildGroup('inactive'),
+			this._buildInactiveNav(),
 		);
 
 		this._container.appendChild(row);
 	}
 
-	_buildGroup(type) {
+	_buildActiveGroup() {
 		const group = document.createElement('div');
-		group.className = `attr-group attr-group--${type}`;
+		group.className = 'attr-group attr-group--active';
 
-		const attrs = type === 'active'
-			? this._state.getActive()
-			: this._state.getInactive();
-
-		for (let i = 0; i < attrs.length; i++) {
-			group.appendChild(this._buildBox(attrs[i], type, i));
-		}
+		this._state.getActive().forEach((attr, idx) => {
+			group.appendChild(this._buildBox(attr, idx));
+		});
 
 		return group;
 	}
 
-	_buildBox(attr, type, idx) {
-		const isActive   = type === 'active';
-		const isDisabled = !isActive && this._state.isFull();
-		const isLast     = isActive && this._state.isMinimal();
+	_buildInactiveNav() {
+		const inactive = this._state.getInactive();
+		const total    = inactive.length;
+		const page     = inactive.slice(this._offset, this._offset + INACTIVE_PAGE);
+		const atStart  = this._offset === 0;
+		const atEnd    = this._offset + INACTIVE_PAGE >= total;
+
+		const nav = document.createElement('div');
+		nav.className = 'attr-nav';
+
+		const prevBtn = this._buildNavBtn('‹', !atStart, () => {
+			this._offset = Math.max(0, this._offset - INACTIVE_PAGE);
+			this._render();
+		});
+
+		const group = document.createElement('div');
+		group.className = 'attr-group attr-group--inactive';
+		page.forEach(attr => group.appendChild(this._buildInactiveBox(attr)));
+
+		const nextBtn = this._buildNavBtn('›', !atEnd, () => {
+			this._offset = Math.min(
+				Math.max(0, total - INACTIVE_PAGE),
+				this._offset + INACTIVE_PAGE,
+			);
+			this._render();
+		});
+
+		nav.append(prevBtn, group, nextBtn);
+		return nav;
+	}
+
+	_buildBox(attr, idx) {
+		const isLast = this._state.isMinimal();
 
 		const box = document.createElement('div');
-		box.className = [
-			'attr-box',
-			`attr-box--${type}`,
-			isDisabled ? 'attr-box--disabled' : '',
-			isLast     ? 'attr-box--last'     : '',
-		].filter(Boolean).join(' ');
-
+		box.className = ['attr-box', 'attr-box--active', isLast ? 'attr-box--last' : '']
+			.filter(Boolean).join(' ');
 		box.textContent = this._labelFn(attr);
 		box.dataset.attr = attr;
+		box.draggable = true;
 
-		if (isDisabled) {
-			box.title = 'Remove an active attribute first (max 5)';
-		} else if (isLast) {
+		if (isLast) {
 			box.title = 'At least one attribute must remain active';
 		} else {
 			box.addEventListener('click', () => this._state.toggle(attr));
 		}
 
-		if (isActive) {
-			box.draggable = true;
-			box.addEventListener('dragstart',  e => this._onDragStart(e, idx));
-			box.addEventListener('dragover',   e => this._onDragOver(e, idx));
-			box.addEventListener('dragleave',  e => e.currentTarget.classList.remove('attr-box--drag-over'));
-			box.addEventListener('drop',       e => this._onDrop(e, idx));
-			box.addEventListener('dragend',    () => this._onDragEnd());
+		box.addEventListener('dragstart',  e => this._onDragStart(e, idx));
+		box.addEventListener('dragover',   e => this._onDragOver(e, idx));
+		box.addEventListener('dragleave',  e => e.currentTarget.classList.remove('attr-box--drag-over'));
+		box.addEventListener('drop',       e => this._onDrop(e, idx));
+		box.addEventListener('dragend',    () => this._onDragEnd());
+
+		return box;
+	}
+
+	_buildInactiveBox(attr) {
+		const isDisabled = this._state.isFull();
+
+		const box = document.createElement('div');
+		box.className = ['attr-box', 'attr-box--inactive', isDisabled ? 'attr-box--disabled' : '']
+			.filter(Boolean).join(' ');
+		box.textContent = this._labelFn(attr);
+		box.dataset.attr = attr;
+
+		if (isDisabled) {
+			box.title = 'Remove an active attribute first (max 5)';
+		} else {
+			box.addEventListener('click', () => this._state.toggle(attr));
 		}
 
 		return box;
@@ -97,13 +140,21 @@ export default class AttributeSelector {
 		return d;
 	}
 
+	_buildNavBtn(label, enabled, onClick) {
+		const btn = document.createElement('button');
+		btn.className = 'attr-nav-btn';
+		btn.textContent = label;
+		btn.disabled = !enabled;
+		if (enabled) btn.addEventListener('click', onClick);
+		return btn;
+	}
+
 
 	// ── Drag handlers ─────────────────────────────────────────────────────────
 
 	_onDragStart(e, idx) {
 		this._dragSrcIdx = idx;
 		e.dataTransfer.effectAllowed = 'move';
-		// Defer class addition so it doesn't affect the drag ghost image.
 		setTimeout(() => e.target.classList.add('attr-box--dragging'), 0);
 	}
 
