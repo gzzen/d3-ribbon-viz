@@ -60,6 +60,98 @@ svg {
 	display: none;
 }
 
+/* ── Attribute selector ───────────────────────────────────────────────────── */
+
+.attr-selector {
+	display: flex;
+	align-items: center;
+	padding: 8px 12px 8px 160px; /* left-align active group with chart axes */
+	background: #f4f4f6;
+	border-bottom: 1px solid #e0e0e6;
+	overflow-x: auto;
+	min-height: 44px;
+	gap: 0;
+}
+
+.attr-group {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	flex-shrink: 0;
+}
+
+/* vertical rule between active and inactive groups */
+.attr-divider {
+	width: 1px;
+	height: 22px;
+	background: #c8c8d0;
+	margin: 0 12px;
+	flex-shrink: 0;
+}
+
+.attr-box {
+	padding: 4px 10px;
+	border-radius: 4px;
+	font-size: 11px;
+	font-family: Arial, sans-serif;
+	white-space: nowrap;
+	border: 1px solid transparent;
+	transition: background 0.12s, color 0.12s, opacity 0.12s;
+	user-select: none;
+}
+
+/* active: prominent, draggable */
+.attr-box--active {
+	background: #1a1a2e;
+	color: #fff;
+	cursor: grab;
+}
+
+.attr-box--active:hover:not(.attr-box--last) {
+	background: #2d2d50;
+}
+
+/* last remaining active attr: visually muted to signal it cannot be removed */
+.attr-box--last {
+	background: #3a3a58;
+	color: #aaa;
+	cursor: default;
+}
+
+/* inactive: muted, clickable */
+.attr-box--inactive {
+	background: #ececf0;
+	color: #555;
+	border-color: #d8d8e0;
+	cursor: pointer;
+}
+
+.attr-box--inactive:hover {
+	background: #e0e0ea;
+	color: #222;
+}
+
+/* inactive but list is full: greyed out, not clickable */
+.attr-box--disabled {
+	background: #f2f2f4;
+	color: #b0b0b8;
+	border-color: #e8e8ec;
+	cursor: not-allowed;
+}
+
+/* drag states */
+.attr-box--dragging {
+	opacity: 0.3;
+	cursor: grabbing;
+}
+
+.attr-box--drag-over {
+	outline: 2px solid #4CAF50;
+	outline-offset: 2px;
+}
+
+/* ── SVG elements ─────────────────────────────────────────────────────────── */
+
 .axis-line {
 	stroke: #ffffff00;
 	stroke-width: 1.5;

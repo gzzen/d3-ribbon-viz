@@ -49,6 +49,12 @@ export function getNumericRange(attr) {
 	return range;
 }
 
+/** Return all attribute names present in the loaded metadata. */
+export function getAllAttrs() {
+	_requireInit();
+	return Object.keys(map);
+}
+
 // Test-only: reset internal state so init() can be called again.
 export function _reset() {
 	map = null;
