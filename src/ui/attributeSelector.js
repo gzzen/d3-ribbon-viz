@@ -6,7 +6,7 @@
  *   navigated with ← / → buttons.
  */
 
-const INACTIVE_PAGE = 5;
+const TOTAL_VISIBLE = 8; // active + inactive boxes shown at once
 
 export default class AttributeSelector {
 
@@ -23,8 +23,8 @@ export default class AttributeSelector {
 		this._dragSrcIdx = null;
 
 		state.on(() => {
-			// clamp offset so it stays valid after the inactive list shrinks
-			const max = Math.max(0, this._state.getInactive().length - INACTIVE_PAGE);
+			// clamp offset — page size also changes when active count changes
+			const max = Math.max(0, this._state.getInactive().length - this._inactivePage());
 			this._offset = Math.min(this._offset, max);
 			this._render();
 		});
@@ -61,11 +61,12 @@ export default class AttributeSelector {
 	}
 
 	_buildInactiveNav() {
-		const inactive = this._state.getInactive();
-		const total    = inactive.length;
-		const page     = inactive.slice(this._offset, this._offset + INACTIVE_PAGE);
-		const atStart  = this._offset === 0;
-		const atEnd    = this._offset + INACTIVE_PAGE >= total;
+		const inactive    = this._state.getInactive();
+		const total       = inactive.length;
+		const inactivePage = this._inactivePage();
+		const page        = inactive.slice(this._offset, this._offset + inactivePage);
+		const atStart     = this._offset === 0;
+		const atEnd       = this._offset + inactivePage >= total;
 
 		const nav = document.createElement('div');
 		nav.className = 'attr-nav';
@@ -81,14 +82,19 @@ export default class AttributeSelector {
 
 		const nextBtn = this._buildNavBtn('›', !atEnd, () => {
 			this._offset = Math.min(
-				Math.max(0, total - INACTIVE_PAGE),
-				this._offset + INACTIVE_PAGE,
+				Math.max(0, total - inactivePage),
+				this._offset + inactivePage,
 			);
 			this._render();
 		});
 
 		nav.append(prevBtn, group, nextBtn);
 		return nav;
+	}
+
+	// How many inactive boxes to show: fills the remaining slots up to TOTAL_VISIBLE.
+	_inactivePage() {
+		return Math.max(0, TOTAL_VISIBLE - this._state.getActive().length);
 	}
 
 	_buildBox(attr, idx) {
