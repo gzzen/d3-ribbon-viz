@@ -66,10 +66,12 @@ svg {
 	display: flex;
 	align-items: center;
 	flex-wrap: nowrap;
-	padding: 8px 12px 8px 160px; /* left-align active group with chart axes */
+	max-width: 80%;
+	margin: 0 auto;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid #e0e0e6;
 	background: #f4f4f6;
-	border-bottom: 1px solid #e0e0e6;
-	min-height: 44px;
+	min-height: 2.75rem;
 	overflow: hidden; /* row is fixed — no scrolling */
 }
 
@@ -77,7 +79,7 @@ svg {
 .attr-group--active {
 	display: flex;
 	align-items: center;
-	gap: 5px;
+	gap: 0.35rem;
 	flex-shrink: 0;
 }
 
@@ -85,14 +87,14 @@ svg {
 .attr-group--inactive {
 	display: flex;
 	align-items: center;
-	gap: 5px;
+	gap: 0.35rem;
 }
 
 /* navigation shell for the inactive section: fills remaining row width */
 .attr-nav {
 	display: flex;
 	align-items: center;
-	gap: 6px;
+	gap: 0.4rem;
 	flex: 1;
 	min-width: 0;
 }
@@ -100,23 +102,23 @@ svg {
 /* vertical rule between active and inactive groups */
 .attr-divider {
 	width: 1px;
-	height: 22px;
+	height: 1.4rem;
 	background: #c8c8d0;
-	margin: 0 12px;
+	margin: 0 0.75rem;
 	flex-shrink: 0;
 }
 
-/* prev / next paging buttons */
+/* prev / next paging buttons — em values are relative to this element's font-size */
 .attr-nav-btn {
 	flex-shrink: 0;
-	width: 22px;
-	height: 22px;
+	font-size: 0.9rem;
+	width: 1.5em;
+	height: 1.5em;
 	padding: 0;
 	border: 1px solid #c8c8d4;
-	border-radius: 4px;
+	border-radius: 0.25em;
 	background: #fff;
 	color: #444;
-	font-size: 14px;
 	line-height: 1;
 	cursor: pointer;
 	display: flex;
@@ -135,13 +137,14 @@ svg {
 	cursor: default;
 }
 
+/* attr-box em values are relative to this element's own font-size */
 .attr-box {
-	padding: 4px 10px;
-	border-radius: 4px;
-	font-size: 11px;
+	font-size: 0.7rem;
+	padding: 0.35em 0.9em;
+	border-radius: 0.35em;
 	font-family: Arial, sans-serif;
 	white-space: nowrap;
-	max-width: 120px;
+	max-width: 10em;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	border: 1px solid transparent;
