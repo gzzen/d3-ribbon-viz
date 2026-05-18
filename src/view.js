@@ -30,13 +30,12 @@ export default class ParallelCoordsView {
 		const samples = await loadCSV(data.csvPath, { idColumn: 'id' });
 		this.dataProcessor = new DataProcessor(samples);
 
-		// Design width matches AxisManager's coordinate system.
-		// viewBox + CSS width lets the SVG scale without recomputing axis positions.
-		const viewportWidth = window.innerWidth - viewport.rightPad - viewport.sidebarWidth;
+		const viewWidth  = Math.round(window.innerWidth  * (1 - viewport.rightPadFraction - viewport.sidebarFraction));
+		const viewHeight = Math.round(window.innerHeight * viewport.heightFraction);
 
 		const svg = d3.select(this.containerSelector)
 			.append('svg')
-			.attr('viewBox', `0 0 ${viewportWidth} ${viewport.height}`)
+			.attr('viewBox', `0 0 ${viewWidth} ${viewHeight}`)
 			.style('width', viewport.svgWidthStyle)
 			.style('height', 'auto')
 			.style('margin-left', viewport.svgMarginLeft);
@@ -85,10 +84,13 @@ export default class ParallelCoordsView {
 			freqMap.set(attr, this.dataProcessor.computeNodeFrequencies(attr));
 		}
 
-		const viewWidth = window.innerWidth - viewport.rightPad - viewport.sidebarWidth;
-		const layouts = computeLayouts(this.displayAttrs, freqMap, viewWidth);
+		const viewWidth  = Math.round(window.innerWidth  * (1 - viewport.rightPadFraction - viewport.sidebarFraction));
+		const viewHeight = Math.round(window.innerHeight * viewport.heightFraction);
+		const { layouts, axisHeight, axisTop, axisBottom, labelY } = computeLayouts(
+			this.displayAttrs, freqMap, viewWidth, viewHeight
+		);
 
-		this.axisRenderer.render(layouts);
+		this.axisRenderer.render(layouts, { axisTop, axisBottom, labelY });
 		if (!this._legendInitialized) {
 			this.legend.init(layouts);
 			this._legendInitialized = true;
@@ -96,7 +98,7 @@ export default class ParallelCoordsView {
 			this.legend.update(layouts);
 		}
 		this.nodeRenderer.init(layouts);
-		this.ribbonRenderer.init(this.nodeRenderer.colorScales, layouts);
+		this.ribbonRenderer.init(this.nodeRenderer.colorScales, layouts, axisHeight);
 	}
 
 }

@@ -1,10 +1,5 @@
 import { getAttrLabel } from '../utils/metadata.js';
 import { wrapLabel } from '../utils.js';
-import { axis, viewport } from '../config.js';
-
-const AXIS_TOP = axis.marginTop + axis.paddingInner;
-const AXIS_BOTTOM = viewport.height - axis.marginBottom - axis.paddingInner;
-const LABEL_Y = axis.marginTop - 10;
 
 export default class AxisRenderer {
 
@@ -13,7 +8,7 @@ export default class AxisRenderer {
 	}
 
 	/** Bind and update SVG axis lines and labels from pre-computed layouts. */
-	render(layouts) {
+	render(layouts, { axisTop, axisBottom, labelY }) {
 		const axes = this.axisGroup
 			.selectAll('g.axis')
 			.data(layouts, d => d.attr);
@@ -26,12 +21,12 @@ export default class AxisRenderer {
 
 		axesEnter.append('line')
 			.attr('class', 'axis-line')
-			.attr('y1', AXIS_TOP)
-			.attr('y2', AXIS_BOTTOM);
+			.attr('y1', axisTop)
+			.attr('y2', axisBottom);
 
 		axesEnter.append('text')
 			.attr('class', 'axis-label')
-			.attr('y', LABEL_Y);
+			.attr('y', labelY);
 
 		const axesMerge = axesEnter.merge(axes);
 
