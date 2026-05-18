@@ -1,5 +1,9 @@
 :root {
-  --background-color: #FFF6DE;
+	--text: #333;
+  --main-bg: #FFF6DE;
+	/* --axes-row-bg: #FFEBCC; */
+	--dropdown-bg: #FFF6DE;
+	--attr-box: #444444c3;
 }
 
 
@@ -15,7 +19,7 @@ html, body {
 body {
 	font-family: Arial, sans-serif;
 	overflow-x: hidden;
-	background: var(--background-color);
+	background: var(--main-bg);
 }
 
 h1 {
@@ -62,8 +66,12 @@ svg {
 /* Active row: relative container so absolute-positioned boxes anchor to it */
 .attr-active-row {
 	position: relative;
-	height: 2.4rem;
+	height: 3rem;
 	box-sizing: border-box;
+	/* border-radius: 1.5rem; */
+	/* background: var(--axes-row-bg); */
+	border-bottom: 1px solid #ddd;
+	border-top: 1px solid #ddd;
 }
 
 /* Inactive dropdown: scrollable, animated reveal */
@@ -71,10 +79,10 @@ svg {
 	max-height: 0;
 	overflow: hidden;
 	transition: max-height 0.28s ease;
-	background: #fff;
-	border: 1px solid #ddd;
+	background: var(--dropdown-bg);
+	/* border: 1px solid #ddd; */
 	border-top: none;
-	border-radius: 0 0 0.4em 0.4em;
+	border-radius: 0 0 0.7em 0.7em;
 	box-sizing: border-box;
 	width: fit-content;
 	min-width: 10rem;
@@ -83,6 +91,8 @@ svg {
 .attr-inactive-list.expanded {
 	max-height: 12rem;
 	overflow-y: auto;
+	border: 1px solid #ddd;
+	border-top: none;
 }
 
 .attr-dropdown-item {
@@ -92,7 +102,7 @@ svg {
 	font-size: 0.78rem;
 	font-family: Arial, sans-serif;
 	text-align: left;
-	color: #333;
+	color: #555;
 	background: none;
 	border: none;
 	border-bottom: 1px solid #f0f0f0;
@@ -105,7 +115,7 @@ svg {
 }
 
 .attr-dropdown-item:hover:not(:disabled) {
-	background: #f5f5f5;
+	background: #BFDDF0;
 	color: #111;
 }
 
@@ -146,7 +156,7 @@ svg {
 	border-radius: 0.35em;
 	font-family: Arial, sans-serif;
 	white-space: nowrap;
-	max-width: 12em;
+	max-width: 20%;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	border: 1px solid transparent;
@@ -156,7 +166,7 @@ svg {
 
 /* active: prominent, draggable */
 .attr-box--active {
-	background: #1a1a2e;
+	background: var(--attr-box);
 	color: #fff;
 	cursor: grab;
 }

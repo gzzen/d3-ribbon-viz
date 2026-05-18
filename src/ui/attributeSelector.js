@@ -73,7 +73,8 @@ export default class AttributeSelector {
 		if (x !== null) {
 			box.style.position  = 'absolute';
 			box.style.left      = `${x}px`;
-			box.style.transform = 'translateX(-50%)';
+			box.style.top       = '50%';
+			box.style.transform = 'translate(-50%, -50%)';
 		}
 
 		if (!isLast) box.addEventListener('click', () => this._state.toggle(attr));
@@ -97,7 +98,8 @@ export default class AttributeSelector {
 		if (x !== null) {
 			box.style.position  = 'absolute';
 			box.style.left      = `${x}px`;
-			box.style.transform = 'translateX(-50%)';
+			box.style.top       = '50%';
+			box.style.transform = 'translate(-50%, -50%)';
 		}
 		return box;
 	}
