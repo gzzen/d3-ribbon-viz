@@ -15,7 +15,7 @@ export default class Legend {
 			.attr('class', 'legend-bg')
 			.attr('x', 0).attr('y', 0)
 			.attr('rx', 4).attr('ry', 4)
-			.attr('fill', '#f9f9f9')
+			.attr('fill', '#ffffff5e')
 			.attr('stroke', '#ddd').attr('stroke-width', 1);
 		this.contentGroup = this.legendGroup.append('g')
 			.attr('transform', `translate(${legendCfg.panelPadding}, ${legendCfg.panelPadding})`);

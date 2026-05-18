@@ -9,9 +9,9 @@ export const data = {
 // Design width  = window.innerWidth  × (1 - rightPadFraction - sidebarFraction)
 // Design height = window.innerHeight × heightFraction
 export const viewport = {
-	rightPadFraction:  0.02,   // right whitespace
+	rightPadFraction:  0.1,   // right whitespace
 	sidebarFraction:   0.11,   // left sidebar / navigation
-	heightFraction:    0.60,   // SVG height relative to window height
+	heightFraction:    0.50,   // SVG height relative to window height
 	// CSS strings derived from sidebarFraction so they stay consistent
 	get svgWidthStyle()  { return `calc(100% - ${this.sidebarFraction * 100}vw)`; },
 	get svgMarginLeft()  { return `${this.sidebarFraction * 100}vw`; },
@@ -21,17 +21,17 @@ export const viewport = {
 export const axis = {
 	marginLeftFraction:    0.065,  // left margin as fraction of SVG width
 	marginRightFraction:   0.065,  // right margin as fraction of SVG width
-	marginTopFraction:     0.28,   // top margin as fraction of SVG height (legend space)
+	marginTopFraction:     0.35,   // top margin as fraction of SVG height (legend space)
 	marginBottomFraction:  0.05,   // bottom margin as fraction of SVG height
-	paddingInnerFraction:  0.055,  // inner top/bottom padding as fraction of SVG height
-	labelOffsetFraction:   0.018,  // axis label Y offset above axis column as fraction of SVG height
+	paddingInnerFraction:  0,  // inner top/bottom padding as fraction of SVG height
+	// labelOffsetFraction:   0.018,  // axis label Y offset above axis column as fraction of SVG height
 	nodePadding: 0,                // gap between adjacent nodes, in SVG coordinate units
 };
 
 // Node visual constants (SVG coordinate units — scale implicitly with viewBox)
 export const node = {
-	width: 20,
-	widthHovered: 30,
+	width: 50,
+	widthHovered: 55,
 	dimmedGrey: '#ffffff',
 	dimmedGreyAmount: 0.6,
 	selectedStroke: '#ffffff',
@@ -61,9 +61,9 @@ export const legend = {
 	attrLabelFontSize: 10,
 	attrLabelColor: '#444',
 	attrLabelWrapWidth: 20,
-	columnGap: 10,
+	columnGap: 15,
 	columnWidth: 100,
-	labelContentPadding: 25,
+	labelContentPadding: 30,
 	swatchSize: 9,
 	swatchGap: 3,
 	swatchLabelGap: 6,

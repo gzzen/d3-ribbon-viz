@@ -1,46 +1,36 @@
 /**
- * Attribute selector — two-row layout.
+ * Attribute selector — axis-aligned active row + collapsible inactive dropdown.
  *
- * Active row: absolutely positioned boxes aligned to SVG axis centres.
- *   Rightmost box is the fixed target variable (not removable).
- * Inactive row: paged list, toggled by a tag-shaped button.
+ * Active boxes are absolutely positioned so each center aligns with its axis.
+ * The target variable always appears at the rightmost axis, read-only.
+ * Inactive attrs live in a scrollable dropdown toggled by a button at the
+ * bottom of whichever row is currently visible.
+ *
+ * Call syncToLayouts(layouts, svgMarginLeft, svgWidth) after every render
+ * so box positions track the axis coordinates.
  */
-
-const INACTIVE_PAGE = 6;
 
 export default class AttributeSelector {
 
-	/**
-	 * @param {HTMLElement} container
-	 * @param {SelectorState} state
-	 * @param {Function} labelFn - (attr: string) => string
-	 * @param {string} targetAttr - the fixed target-variable attribute key
-	 */
 	constructor(container, state, labelFn, targetAttr) {
-		this._container = container;
-		this._state = state;
-		this._labelFn = labelFn;
-		this._targetAttr = targetAttr;
-		this._offset = 0;
-		this._dragSrcIdx = null;
-		this._inactiveVisible = false;
-		this._layouts = null;
-		this._viewWidth = null;
+		this._container     = container;
+		this._state         = state;
+		this._labelFn       = labelFn;
+		this._targetAttr    = targetAttr;
+		this._expanded      = false;
+		this._xMap          = null;
 		this._svgMarginLeft = null;
+		this._svgWidth      = null;
+		this._dragSrcIdx    = null;
 
-		state.on(() => {
-			const max = Math.max(0, this._state.getInactive().length - INACTIVE_PAGE);
-			this._offset = Math.min(this._offset, max);
-			this._render();
-		});
+		state.on(() => this._render());
 		this._render();
 	}
 
-	/** Called after each chart render to align boxes with axis positions. */
-	updateLayouts({ layouts, viewWidth, svgMarginLeft }) {
-		this._layouts = layouts;
-		this._viewWidth = viewWidth;
+	syncToLayouts(layouts, svgMarginLeft, svgWidth) {
+		this._xMap          = new Map(layouts.map(l => [l.attr, l.x]));
 		this._svgMarginLeft = svgMarginLeft;
+		this._svgWidth      = svgWidth;
 		this._render();
 	}
 
@@ -49,87 +39,28 @@ export default class AttributeSelector {
 
 	_render() {
 		this._container.innerHTML = '';
-
-		const panel = document.createElement('div');
-		panel.className = 'attr-selector-panel';
-		if (this._viewWidth !== null) {
-			panel.style.marginLeft = this._svgMarginLeft;
-			panel.style.width = `${this._viewWidth}px`;
-		}
-
-		panel.appendChild(this._buildActiveRow());
-		if (this._inactiveVisible) {
-			panel.appendChild(this._buildInactiveRow());
-		}
-		panel.appendChild(this._buildToggle());
-
-		this._container.appendChild(panel);
+		const wrapper = document.createElement('div');
+		wrapper.className = 'attr-selector-wrapper';
+		wrapper.appendChild(this._buildActiveRow());
+		wrapper.appendChild(this._buildDropdown());
+		this._container.appendChild(wrapper);
 	}
 
 	_buildActiveRow() {
 		const row = document.createElement('div');
-		row.className = 'attr-active-row' + (this._inactiveVisible ? ' attr-active-row--open' : '');
+		row.className = 'attr-active-row';
+		this._applySvgLayout(row);
 
-		const axisX = new Map();
-		if (this._layouts) {
-			for (const layout of this._layouts) axisX.set(layout.attr, layout.x);
+		for (const [idx, attr] of this._state.getActive().entries()) {
+			row.appendChild(this._buildActiveBox(attr, idx));
 		}
-
-		this._state.getActive().forEach((attr, idx) => {
-			row.appendChild(this._buildActiveBox(attr, idx, axisX.get(attr) ?? null));
-		});
-
-		const targetX = this._layouts ? this._layouts[this._layouts.length - 1].x : null;
-		row.appendChild(this._buildTargetBox(targetX));
-
+		row.appendChild(this._buildTargetBox());
 		return row;
 	}
 
-	_buildInactiveRow() {
-		const inactive = this._state.getInactive();
-		const total    = inactive.length;
-		const page     = inactive.slice(this._offset, this._offset + INACTIVE_PAGE);
-		const atStart  = this._offset === 0;
-		const atEnd    = this._offset + INACTIVE_PAGE >= total;
-
-		const row = document.createElement('div');
-		row.className = 'attr-inactive-row';
-
-		const prevBtn = this._buildNavBtn('‹', !atStart, () => {
-			this._offset = Math.max(0, this._offset - INACTIVE_PAGE);
-			this._render();
-		});
-
-		const group = document.createElement('div');
-		group.className = 'attr-group--inactive';
-		page.forEach(attr => group.appendChild(this._buildInactiveBox(attr)));
-
-		const nextBtn = this._buildNavBtn('›', !atEnd, () => {
-			this._offset = Math.min(Math.max(0, total - INACTIVE_PAGE), this._offset + INACTIVE_PAGE);
-			this._render();
-		});
-
-		row.append(prevBtn, group, nextBtn);
-		return row;
-	}
-
-	_buildToggle() {
-		const btn = document.createElement('button');
-		btn.className = 'attr-row-toggle';
-		btn.textContent = this._inactiveVisible ? '▲' : '▼';
-		btn.title = this._inactiveVisible ? 'Hide more attributes' : 'Show more attributes';
-		btn.addEventListener('click', () => {
-			this._inactiveVisible = !this._inactiveVisible;
-			this._render();
-		});
-		return btn;
-	}
-
-
-	// ── Box builders ──────────────────────────────────────────────────────────
-
-	_buildActiveBox(attr, idx, x) {
+	_buildActiveBox(attr, idx) {
 		const isLast = this._state.isMinimal();
+		const x      = this._xMap?.get(attr) ?? null;
 
 		const box = document.createElement('div');
 		box.className = ['attr-box', 'attr-box--active', isLast ? 'attr-box--last' : '']
@@ -139,9 +70,14 @@ export default class AttributeSelector {
 		box.dataset.attr = attr;
 		box.draggable = true;
 
-		if (x !== null) box.style.left = `${x}px`;
-		if (!isLast) box.addEventListener('click', () => this._state.toggle(attr));
+		if (x !== null) {
+			box.style.position  = 'absolute';
+			box.style.left      = `${x}px`;
+			box.style.top       = '50%';
+			box.style.transform = 'translate(-50%, -50%)';
+		}
 
+		if (!isLast) box.addEventListener('click', () => this._state.toggle(attr));
 		box.addEventListener('dragstart', e => this._onDragStart(e, idx));
 		box.addEventListener('dragover',  e => this._onDragOver(e, idx));
 		box.addEventListener('dragleave', e => e.currentTarget.classList.remove('attr-box--drag-over'));
@@ -151,36 +87,68 @@ export default class AttributeSelector {
 		return box;
 	}
 
-	_buildTargetBox(x) {
+	_buildTargetBox() {
+		const x = this._xMap?.get(this._targetAttr) ?? null;
+
 		const box = document.createElement('div');
 		box.className = 'attr-box attr-box--target';
 		box.textContent = this._labelFn(this._targetAttr);
-		box.title = 'Target variable (fixed)';
-		if (x !== null) box.style.left = `${x}px`;
+		box.title = 'Target variable (read-only)';
+
+		if (x !== null) {
+			box.style.position  = 'absolute';
+			box.style.left      = `${x}px`;
+			box.style.top       = '50%';
+			box.style.transform = 'translate(-50%, -50%)';
+		}
 		return box;
 	}
 
-	_buildInactiveBox(attr) {
-		const isDisabled = this._state.isFull();
+	// SVG-width container that centres both the list and toggle button.
+	_buildDropdown() {
+		const wrap = document.createElement('div');
+		wrap.className = 'attr-dropdown-wrap';
+		this._applySvgLayout(wrap);
+		wrap.appendChild(this._buildInactiveList());
+		wrap.appendChild(this._buildToggleBtn());
+		return wrap;
+	}
 
-		const box = document.createElement('div');
-		box.className = ['attr-box', 'attr-box--inactive', isDisabled ? 'attr-box--disabled' : '']
+	_buildInactiveList() {
+		const list = document.createElement('div');
+		list.className = ['attr-inactive-list', this._expanded ? 'expanded' : '']
 			.filter(Boolean).join(' ');
-		box.textContent = this._labelFn(attr);
-		box.title = isDisabled ? 'Remove an active attribute first (max 5)' : this._labelFn(attr);
-		box.dataset.attr = attr;
 
-		if (!isDisabled) box.addEventListener('click', () => this._state.toggle(attr));
-		return box;
+		const isFull = this._state.isFull();
+		for (const attr of this._state.getInactive()) {
+			const item = document.createElement('button');
+			item.className = ['attr-dropdown-item', isFull ? 'attr-dropdown-item--disabled' : '']
+				.filter(Boolean).join(' ');
+			item.textContent = this._labelFn(attr);
+			item.disabled = isFull;
+			item.title = isFull ? 'Remove an active attribute first (max 5)' : '';
+			if (!isFull) item.addEventListener('click', () => this._state.toggle(attr));
+			list.appendChild(item);
+		}
+		return list;
 	}
 
-	_buildNavBtn(label, enabled, onClick) {
+	_buildToggleBtn() {
 		const btn = document.createElement('button');
-		btn.className = 'attr-nav-btn';
-		btn.textContent = label;
-		btn.disabled = !enabled;
-		if (enabled) btn.addEventListener('click', onClick);
+		btn.className = 'attr-toggle-btn';
+		btn.textContent = this._expanded ? '▲ Hide' : '▼ Attributes';
+		btn.addEventListener('click', () => {
+			this._expanded = !this._expanded;
+			const list = this._container.querySelector('.attr-inactive-list');
+			if (list) list.classList.toggle('expanded', this._expanded);
+			btn.textContent = this._expanded ? '▲ Hide' : '▼ Attributes';
+		});
 		return btn;
+	}
+
+	_applySvgLayout(el) {
+		if (this._svgMarginLeft !== null) el.style.marginLeft = this._svgMarginLeft;
+		if (this._svgWidth      !== null) el.style.width      = `${this._svgWidth}px`;
 	}
 
 
@@ -196,9 +164,7 @@ export default class AttributeSelector {
 		e.preventDefault();
 		e.dataTransfer.dropEffect = 'move';
 		this._clearDragOverHighlights();
-		if (idx !== this._dragSrcIdx) {
-			e.currentTarget.classList.add('attr-box--drag-over');
-		}
+		if (idx !== this._dragSrcIdx) e.currentTarget.classList.add('attr-box--drag-over');
 	}
 
 	_onDrop(e, toIdx) {
