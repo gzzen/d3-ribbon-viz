@@ -24,22 +24,10 @@ export default class AxisRenderer {
 			.attr('y1', axisTop)
 			.attr('y2', axisBottom);
 
-		axesEnter.append('text')
-			.attr('class', 'axis-label')
-			.attr('y', labelY);
 
 		const axesMerge = axesEnter.merge(axes);
 
 		axesMerge.attr('transform', d => `translate(${d.x}, 0)`);
-
-		axesMerge.select('line.axis-line')
-			.attr('x1', 0)
-			.attr('x2', 0);
-
-		axesMerge.select('text.axis-label')
-			.attr('x', 0)
-			.text(d => getAttrLabel(d.attr))
-			.call(wrapLabel, 20);
 	}
 
 }
