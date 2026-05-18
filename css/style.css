@@ -55,80 +55,88 @@ svg {
 
 /* ── Attribute selector ───────────────────────────────────────────────────── */
 
-.attr-selector {
-	display: flex;
-	align-items: center;
-	flex-wrap: nowrap;
-	width: fit-content;
-	margin: 0 auto;
-	padding: 0.5rem 0.75rem;
-	border: 1px solid #e0e0e6;
-	border-radius: 1em;
-	background: #574964;
-	min-height: 2.75rem;
-	overflow: hidden; /* row is fixed — no scrolling */
+.attr-selector-wrapper {
+	padding-top: 0.6rem;
 }
 
-/* active group: fixed, never shrinks */
-.attr-group--active {
-	display: flex;
-	align-items: center;
-	gap: 0.35rem;
-	flex-shrink: 0;
+/* Active row: relative container so absolute-positioned boxes anchor to it */
+.attr-active-row {
+	position: relative;
+	height: 2.4rem;
+	box-sizing: border-box;
 }
 
-/* inactive group: sits inside the nav between the two buttons */
-.attr-group--inactive {
-	display: flex;
-	align-items: center;
-	gap: 0.35rem;
-}
-
-/* navigation shell for the inactive section: fills remaining row width */
-.attr-nav {
-	display: flex;
-	align-items: center;
-	gap: 0.4rem;
-	flex: 1;
-	min-width: 0;
-}
-
-/* vertical rule between active and inactive groups */
-.attr-divider {
-	width: 1px;
-	height: 1.4rem;
-	background: #c8c8d0;
-	margin: 0 1.5rem;
-	flex-shrink: 0;
-}
-
-/* prev / next paging buttons — em values are relative to this element's font-size */
-.attr-nav-btn {
-	flex-shrink: 0;
-	font-size: 0.9rem;
-	width: 1.5em;
-	height: 1.5em;
-	padding: 0;
-	border: 1px solid #c8c8d4;
-	border-radius: 0.25em;
+/* Inactive dropdown: scrollable, animated reveal */
+.attr-inactive-list {
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height 0.28s ease;
 	background: #fff;
-	color: #444;
-	line-height: 1;
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	transition: background 0.1s, color 0.1s;
+	border: 1px solid #ddd;
+	border-top: none;
+	border-radius: 0 0 0.4em 0.4em;
+	box-sizing: border-box;
+	width: fit-content;
+	min-width: 10rem;
 }
 
-.attr-nav-btn:hover:not(:disabled) {
-	background: #e8e8f0;
+.attr-inactive-list.expanded {
+	max-height: 12rem;
+	overflow-y: auto;
+}
+
+.attr-dropdown-item {
+	display: block;
+	width: 100%;
+	padding: 0.45em 0.75em;
+	font-size: 0.78rem;
+	font-family: Arial, sans-serif;
+	text-align: left;
+	color: #333;
+	background: none;
+	border: none;
+	border-bottom: 1px solid #f0f0f0;
+	cursor: pointer;
+	white-space: normal;
+}
+
+.attr-dropdown-item:last-child {
+	border-bottom: none;
+}
+
+.attr-dropdown-item:hover:not(:disabled) {
+	background: #f5f5f5;
 	color: #111;
 }
 
-.attr-nav-btn:disabled {
-	opacity: 0.3;
-	cursor: default;
+.attr-dropdown-item:disabled {
+	color: #bbb;
+	cursor: not-allowed;
+}
+
+/* Centres both the list and the toggle button within the SVG width */
+.attr-dropdown-wrap {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	box-sizing: border-box;
+}
+
+.attr-toggle-btn {
+	font-size: 0.65rem;
+	padding: 0.2em 1.5em;
+	border: 1px solid #c8c8d4;
+	border-radius: 0 0 0.5em 0.5em;
+	border-top: none;
+	background: #f4f4f6;
+	color: #888;
+	cursor: pointer;
+	transition: background 0.1s, color 0.1s;
+}
+
+.attr-toggle-btn:hover {
+	background: #e8e8f0;
+	color: #444;
 }
 
 /* attr-box em values are relative to this element's own font-size */
@@ -183,6 +191,15 @@ svg {
 	color: #b0b0b8;
 	border-color: #e8e8ec;
 	cursor: not-allowed;
+}
+
+/* target variable: outlined, not interactive */
+.attr-box--target {
+	background: transparent;
+	color: #1b5e20;
+	border: 2px solid #4CAF50;
+	font-weight: 600;
+	cursor: default;
 }
 
 /* drag states */

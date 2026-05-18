@@ -1,33 +1,36 @@
 /**
- * Attribute selector strip.
+ * Attribute selector — axis-aligned active row + collapsible inactive dropdown.
  *
- * Active group: fixed, full set always visible, drag-to-reorder.
- * Inactive group: paged — INACTIVE_PAGE items shown at a time,
- *   navigated with ← / → buttons.
+ * Active boxes are absolutely positioned so each center aligns with its axis.
+ * The target variable always appears at the rightmost axis, read-only.
+ * Inactive attrs live in a scrollable dropdown toggled by a button at the
+ * bottom of whichever row is currently visible.
+ *
+ * Call syncToLayouts(layouts, svgMarginLeft, svgWidth) after every render
+ * so box positions track the axis coordinates.
  */
-
-const TOTAL_VISIBLE = 8; // active + inactive boxes shown at once
 
 export default class AttributeSelector {
 
-	/**
-	 * @param {HTMLElement} container
-	 * @param {SelectorState} state
-	 * @param {Function} labelFn - (attr: string) => string
-	 */
-	constructor(container, state, labelFn) {
-		this._container = container;
-		this._state = state;
-		this._labelFn = labelFn;
-		this._offset = 0;       // index of first visible inactive attr
-		this._dragSrcIdx = null;
+	constructor(container, state, labelFn, targetAttr) {
+		this._container     = container;
+		this._state         = state;
+		this._labelFn       = labelFn;
+		this._targetAttr    = targetAttr;
+		this._expanded      = false;
+		this._xMap          = null;
+		this._svgMarginLeft = null;
+		this._svgWidth      = null;
+		this._dragSrcIdx    = null;
 
-		state.on(() => {
-			// clamp offset — page size also changes when active count changes
-			const max = Math.max(0, this._state.getInactive().length - this._inactivePage());
-			this._offset = Math.min(this._offset, max);
-			this._render();
-		});
+		state.on(() => this._render());
+		this._render();
+	}
+
+	syncToLayouts(layouts, svgMarginLeft, svgWidth) {
+		this._xMap          = new Map(layouts.map(l => [l.attr, l.x]));
+		this._svgMarginLeft = svgMarginLeft;
+		this._svgWidth      = svgWidth;
 		this._render();
 	}
 
@@ -36,125 +39,114 @@ export default class AttributeSelector {
 
 	_render() {
 		this._container.innerHTML = '';
+		const wrapper = document.createElement('div');
+		wrapper.className = 'attr-selector-wrapper';
+		wrapper.appendChild(this._buildActiveRow());
+		wrapper.appendChild(this._buildDropdown());
+		this._container.appendChild(wrapper);
+	}
 
+	_buildActiveRow() {
 		const row = document.createElement('div');
-		row.className = 'attr-selector';
+		row.className = 'attr-active-row';
+		this._applySvgLayout(row);
 
-		row.append(
-			this._buildActiveGroup(),
-			this._buildDivider(),
-			this._buildInactiveNav(),
-		);
-
-		this._container.appendChild(row);
+		for (const [idx, attr] of this._state.getActive().entries()) {
+			row.appendChild(this._buildActiveBox(attr, idx));
+		}
+		row.appendChild(this._buildTargetBox());
+		return row;
 	}
 
-	_buildActiveGroup() {
-		const group = document.createElement('div');
-		group.className = 'attr-group attr-group--active';
-
-		this._state.getActive().forEach((attr, idx) => {
-			group.appendChild(this._buildBox(attr, idx));
-		});
-
-		return group;
-	}
-
-	_buildInactiveNav() {
-		const inactive    = this._state.getInactive();
-		const total       = inactive.length;
-		const inactivePage = this._inactivePage();
-		const page        = inactive.slice(this._offset, this._offset + inactivePage);
-		const atStart     = this._offset === 0;
-		const atEnd       = this._offset + inactivePage >= total;
-
-		const nav = document.createElement('div');
-		nav.className = 'attr-nav';
-
-		const prevBtn = this._buildNavBtn('‹', !atStart, () => {
-			this._offset = Math.max(0, this._offset - inactivePage);
-			this._render();
-		});
-
-		const group = document.createElement('div');
-		group.className = 'attr-group attr-group--inactive';
-		page.forEach(attr => group.appendChild(this._buildInactiveBox(attr)));
-
-		const nextBtn = this._buildNavBtn('›', !atEnd, () => {
-			this._offset = Math.min(
-				Math.max(0, total - inactivePage),
-				this._offset + inactivePage,
-			);
-			this._render();
-		});
-
-		nav.append(prevBtn, group, nextBtn);
-		return nav;
-	}
-
-	// How many inactive boxes to show: fills the remaining slots up to TOTAL_VISIBLE.
-	_inactivePage() {
-		return Math.max(0, TOTAL_VISIBLE - this._state.getActive().length);
-	}
-
-	_buildBox(attr, idx) {
+	_buildActiveBox(attr, idx) {
 		const isLast = this._state.isMinimal();
+		const x      = this._xMap?.get(attr) ?? null;
 
 		const box = document.createElement('div');
 		box.className = ['attr-box', 'attr-box--active', isLast ? 'attr-box--last' : '']
 			.filter(Boolean).join(' ');
 		box.textContent = this._labelFn(attr);
-		box.title = this._labelFn(attr);
+		box.title = isLast ? 'At least one attribute must remain active' : this._labelFn(attr);
 		box.dataset.attr = attr;
 		box.draggable = true;
 
-		if (isLast) {
-			box.title = 'At least one attribute must remain active';
-		} else {
-			box.addEventListener('click', () => this._state.toggle(attr));
+		if (x !== null) {
+			box.style.position  = 'absolute';
+			box.style.left      = `${x}px`;
+			box.style.transform = 'translateX(-50%)';
 		}
 
-		box.addEventListener('dragstart',  e => this._onDragStart(e, idx));
-		box.addEventListener('dragover',   e => this._onDragOver(e, idx));
-		box.addEventListener('dragleave',  e => e.currentTarget.classList.remove('attr-box--drag-over'));
-		box.addEventListener('drop',       e => this._onDrop(e, idx));
-		box.addEventListener('dragend',    () => this._onDragEnd());
+		if (!isLast) box.addEventListener('click', () => this._state.toggle(attr));
+		box.addEventListener('dragstart', e => this._onDragStart(e, idx));
+		box.addEventListener('dragover',  e => this._onDragOver(e, idx));
+		box.addEventListener('dragleave', e => e.currentTarget.classList.remove('attr-box--drag-over'));
+		box.addEventListener('drop',      e => this._onDrop(e, idx));
+		box.addEventListener('dragend',   () => this._onDragEnd());
 
 		return box;
 	}
 
-	_buildInactiveBox(attr) {
-		const isDisabled = this._state.isFull();
+	_buildTargetBox() {
+		const x = this._xMap?.get(this._targetAttr) ?? null;
 
 		const box = document.createElement('div');
-		box.className = ['attr-box', 'attr-box--inactive', isDisabled ? 'attr-box--disabled' : '']
-			.filter(Boolean).join(' ');
-		box.textContent = this._labelFn(attr);
-		box.title = this._labelFn(attr);
-		box.dataset.attr = attr;
+		box.className = 'attr-box attr-box--target';
+		box.textContent = this._labelFn(this._targetAttr);
+		box.title = 'Target variable (read-only)';
 
-		if (isDisabled) {
-			box.title = 'Remove an active attribute first (max 5)';
-		} else {
-			box.addEventListener('click', () => this._state.toggle(attr));
+		if (x !== null) {
+			box.style.position  = 'absolute';
+			box.style.left      = `${x}px`;
+			box.style.transform = 'translateX(-50%)';
 		}
-
 		return box;
 	}
 
-	_buildDivider() {
-		const d = document.createElement('div');
-		d.className = 'attr-divider';
-		return d;
+	// SVG-width container that centres both the list and toggle button.
+	_buildDropdown() {
+		const wrap = document.createElement('div');
+		wrap.className = 'attr-dropdown-wrap';
+		this._applySvgLayout(wrap);
+		wrap.appendChild(this._buildInactiveList());
+		wrap.appendChild(this._buildToggleBtn());
+		return wrap;
 	}
 
-	_buildNavBtn(label, enabled, onClick) {
+	_buildInactiveList() {
+		const list = document.createElement('div');
+		list.className = ['attr-inactive-list', this._expanded ? 'expanded' : '']
+			.filter(Boolean).join(' ');
+
+		const isFull = this._state.isFull();
+		for (const attr of this._state.getInactive()) {
+			const item = document.createElement('button');
+			item.className = ['attr-dropdown-item', isFull ? 'attr-dropdown-item--disabled' : '']
+				.filter(Boolean).join(' ');
+			item.textContent = this._labelFn(attr);
+			item.disabled = isFull;
+			item.title = isFull ? 'Remove an active attribute first (max 5)' : '';
+			if (!isFull) item.addEventListener('click', () => this._state.toggle(attr));
+			list.appendChild(item);
+		}
+		return list;
+	}
+
+	_buildToggleBtn() {
 		const btn = document.createElement('button');
-		btn.className = 'attr-nav-btn';
-		btn.textContent = label;
-		btn.disabled = !enabled;
-		if (enabled) btn.addEventListener('click', onClick);
+		btn.className = 'attr-toggle-btn';
+		btn.textContent = this._expanded ? '▲ Hide' : '▼ Attributes';
+		btn.addEventListener('click', () => {
+			this._expanded = !this._expanded;
+			const list = this._container.querySelector('.attr-inactive-list');
+			if (list) list.classList.toggle('expanded', this._expanded);
+			btn.textContent = this._expanded ? '▲ Hide' : '▼ Attributes';
+		});
 		return btn;
+	}
+
+	_applySvgLayout(el) {
+		if (this._svgMarginLeft !== null) el.style.marginLeft = this._svgMarginLeft;
+		if (this._svgWidth      !== null) el.style.width      = `${this._svgWidth}px`;
 	}
 
 
@@ -170,9 +162,7 @@ export default class AttributeSelector {
 		e.preventDefault();
 		e.dataTransfer.dropEffect = 'move';
 		this._clearDragOverHighlights();
-		if (idx !== this._dragSrcIdx) {
-			e.currentTarget.classList.add('attr-box--drag-over');
-		}
+		if (idx !== this._dragSrcIdx) e.currentTarget.classList.add('attr-box--drag-over');
 	}
 
 	_onDrop(e, toIdx) {

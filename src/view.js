@@ -77,6 +77,10 @@ export default class ParallelCoordsView {
 		this.ribbonRenderer.attachInteractionHandlers(this._ribbonHover, this._ribbonClick);
 	}
 
+	get lastLayouts()   { return this._lastLayouts; }
+	get svgMarginLeft() { return viewport.svgMarginLeft; }
+	get svgWidth()      { return this._viewWidth; }
+
 	render() {
 		const freqMap = new Map();
 		for (const attr of this.displayAttrs) {
@@ -87,6 +91,7 @@ export default class ParallelCoordsView {
 			this.displayAttrs, freqMap, this._viewWidth, this._viewHeight
 		);
 
+		this._lastLayouts = layouts;
 		this.axisRenderer.render(layouts, { axisTop, axisBottom, labelY });
 		if (!this._legendInitialized) {
 			this.legend.init(layouts);
