@@ -84,7 +84,7 @@ Integer range. The renderer samples the range evenly for the gradient legend and
 
 2. **Write a label.json** — add an entry for each attribute you want to visualize. Attributes not listed here will cause a runtime error if selected.
 
-3. **Update config** — set `data.defaultAttrs` to your desired axis attributes and `data.finalAttr` to the rightmost (outcome) attribute.
+3. **Update config** — set `data.defaultAttrs` to your desired default axis attributes and `data.targetAttr` to the rightmost (outcome) attribute.
 
 4. **Ensure an ID column** — either add an `id` column or change the `idColumn` argument in the `loadCSV` call inside `src/view.js`.
 

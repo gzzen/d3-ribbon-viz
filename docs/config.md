@@ -18,32 +18,32 @@ Controls the data source and which attributes are displayed by default.
 
 ## `viewport`
 
-Controls the SVG coordinate system and its CSS framing. The design width is computed as `window.innerWidth - rightPad - sidebarWidth`; the SVG then scales to fill the available space via `viewBox` + CSS width.
+Controls the SVG coordinate system and its CSS framing. The design width is computed as `window.innerWidth × (1 - rightPadFraction - sidebarFraction)`; the design height as `window.innerHeight × heightFraction`. `svgWidthStyle` and `svgMarginLeft` are derived getters that mirror `sidebarFraction` so CSS framing and the coordinate space stay in sync.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| `rightPad` | `number` | `30` | Pixels subtracted from `window.innerWidth` on the right |
-| `sidebarWidth` | `number` | `160` | Pixels reserved for the left sidebar / navigation |
-| `height` | `number` | `550` | SVG coordinate height (viewBox units) |
-| `svgWidthStyle` | `string` | `'calc(100% - 150px)'` | CSS `width` applied to the `<svg>` element |
-| `svgMarginLeft` | `string` | `'150px'` | CSS `margin-left` applied to the `<svg>` element |
+| `rightPadFraction` | `number` | `0.1` | Fraction of `window.innerWidth` reserved as right whitespace |
+| `sidebarFraction` | `number` | `0.11` | Fraction of `window.innerWidth` reserved for the left sidebar |
+| `heightFraction` | `number` | `0.50` | Fraction of `window.innerHeight` used for the SVG coordinate height |
+| `svgWidthStyle` | `string` *(getter)* | `'calc(100% - 11vw)'` | CSS `width` applied to the `<svg>` element; derived from `sidebarFraction` |
+| `svgMarginLeft` | `string` *(getter)* | `'11vw'` | CSS `margin-left` applied to the `<svg>` element; derived from `sidebarFraction` |
 
 ---
 
 ## `axis`
 
-Geometry of the axis layout within the SVG coordinate space.
+Geometry of the axis layout. All `Fraction` keys are multiplied by the SVG coordinate dimension at render time to produce absolute units.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| `marginLeft` | `number` | `80` | Distance from the left SVG edge to the first axis |
-| `marginRight` | `number` | `80` | Distance from the right SVG edge to the last axis |
-| `marginTop` | `number` | `25` | Space above the axis column area (for labels) |
-| `marginBottom` | `number` | `120` | Space below the axis column area (for the legend) |
-| `paddingInner` | `number` | `30` | Additional inset at the top and bottom of each axis column |
-| `nodePadding` | `number` | `0` | Gap in pixels between adjacent node rectangles on an axis |
+| `marginLeftFraction` | `number` | `0.065` | Left margin as fraction of SVG width |
+| `marginRightFraction` | `number` | `0.065` | Right margin as fraction of SVG width |
+| `marginTopFraction` | `number` | `0.35` | Top margin as fraction of SVG height (reserves space for the legend at the top) |
+| `marginBottomFraction` | `number` | `0.05` | Bottom margin as fraction of SVG height |
+| `paddingInnerFraction` | `number` | `0` | Additional inset at the top and bottom of each axis column, as fraction of SVG height |
+| `nodePadding` | `number` | `0` | Gap in SVG coordinate units between adjacent node rectangles on an axis |
 
-The drawable axis height is derived: `(height - marginBottom - paddingInner) - (marginTop + paddingInner)`.
+The drawable axis height is derived: `viewHeight × (1 - marginTopFraction - marginBottomFraction - 2 × paddingInnerFraction)`.
 
 ---
 
@@ -53,8 +53,8 @@ Visual constants for axis node rectangles.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| `width` | `number` | `20` | Default node width in SVG units |
-| `widthHovered` | `number` | `30` | Expanded node width during hover |
+| `width` | `number` | `50` | Default node width in SVG units |
+| `widthHovered` | `number` | `55` | Expanded node width during hover |
 | `dimmedGrey` | `string` | `'#ffffff'` | Target colour for interpolation when a node is dimmed |
 | `dimmedGreyAmount` | `number` | `0.6` | Interpolation factor toward `dimmedGrey` (0 = original, 1 = full grey) |
 | `selectedStroke` | `string` | `'#ffffff'` | Stroke colour on selected nodes |
@@ -99,9 +99,9 @@ Layout and typography for the legend panel at the bottom of the SVG.
 | `attrLabelFontSize` | `number` | `10` | Font size for the attribute name heading |
 | `attrLabelColor` | `string` | `'#444'` | Colour for the attribute name heading |
 | `attrLabelWrapWidth` | `number` | `20` | Max characters per line before wrapping the attribute label |
-| `columnGap` | `number` | `10` | Horizontal gap between attribute columns |
+| `columnGap` | `number` | `15` | Horizontal gap between attribute columns |
 | `columnWidth` | `number` | `100` | Width reserved per attribute column |
-| `labelContentPadding` | `number` | `25` | Gap between the attribute heading and the swatches/bar below it |
+| `labelContentPadding` | `number` | `30` | Gap between the attribute heading and the swatches/bar below it |
 | `swatchSize` | `number` | `9` | Width and height of each colour swatch square |
 | `swatchGap` | `number` | `3` | Vertical gap between swatches |
 | `swatchLabelGap` | `number` | `6` | Gap between a swatch and its text label |
