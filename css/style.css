@@ -52,12 +52,6 @@ body {
 	padding: 0 8px;
 }
 
-.view1 {
-	margin-bottom: 0;
-	margin-top: clamp(10px, 1.4vw, 25px);
-	margin-left: 160px;
-}
-
 svg {
 	max-width: 100%;
 }
@@ -168,11 +162,10 @@ svg {
 /* attr-box em values are relative to this element's own font-size */
 .attr-box {
 	font-size: 0.7rem;
-	padding: 0.35em 0.9em 0.35em 0.35em;
 	border-radius: 0.35em;
 	font-family: Arial, sans-serif;
 	white-space: nowrap;
-	max-width: 20%;
+	max-width: 18%;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	border: 1px solid transparent;
@@ -182,6 +175,7 @@ svg {
 
 /* active: prominent, draggable */
 .attr-box--active {
+	padding: 0.35em 0.9em 0.35em 0.35em;
 	background: var(--attr-box);
 	color: #fff;
 	cursor: grab;
@@ -204,27 +198,6 @@ svg {
 	cursor: default;
 }
 
-/* inactive: muted, clickable */
-.attr-box--inactive {
-	background: #ececf0;
-	color: #555;
-	border-color: #d8d8e0;
-	cursor: pointer;
-}
-
-.attr-box--inactive:hover {
-	background: #e0e0ea;
-	color: #222;
-}
-
-/* inactive but list is full: greyed out, not clickable */
-.attr-box--disabled {
-	background: #f2f2f4;
-	color: #b0b0b8;
-	border-color: #e8e8ec;
-	cursor: not-allowed;
-}
-
 /* target variable: outlined, not interactive */
 .attr-box--target {
 	background: transparent;
@@ -232,6 +205,7 @@ svg {
 	border: 2px solid #4CAF50;
 	font-weight: 600;
 	cursor: default;
+	padding: 0.35em 0.9em 0.35em 0.9em;
 }
 
 /* drag states */
@@ -252,8 +226,3 @@ svg {
 	stroke-width: 1.5;
 }
 
-.axis-label {
-	font-size: 13px;
-	fill: #222;
-	text-anchor: middle;
-}
