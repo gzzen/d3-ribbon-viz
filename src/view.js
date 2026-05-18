@@ -86,6 +86,7 @@ export default class ParallelCoordsView {
 		const { layouts, axisHeight, axisTop, axisBottom, labelY } = computeLayouts(
 			this.displayAttrs, freqMap, this._viewWidth, this._viewHeight
 		);
+		this._layouts = layouts;
 
 		this.axisRenderer.render(layouts, { axisTop, axisBottom, labelY });
 		if (!this._legendInitialized) {
@@ -96,6 +97,14 @@ export default class ParallelCoordsView {
 		}
 		this.nodeRenderer.init(layouts);
 		this.ribbonRenderer.init(this.nodeRenderer.colorScales, layouts, axisHeight);
+	}
+
+	getLayoutInfo() {
+		return {
+			layouts: this._layouts,
+			viewWidth: this._viewWidth,
+			svgMarginLeft: viewport.svgMarginLeft,
+		};
 	}
 
 }

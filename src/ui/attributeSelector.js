@@ -1,12 +1,12 @@
 /**
- * Attribute selector strip.
+ * Attribute selector — two-row layout.
  *
- * Active group: fixed, full set always visible, drag-to-reorder.
- * Inactive group: paged — INACTIVE_PAGE items shown at a time,
- *   navigated with ← / → buttons.
+ * Active row: absolutely positioned boxes aligned to SVG axis centres.
+ *   Rightmost box is the fixed target variable (not removable).
+ * Inactive row: paged list, toggled by a tag-shaped button.
  */
 
-const TOTAL_VISIBLE = 8; // active + inactive boxes shown at once
+const INACTIVE_PAGE = 6;
 
 export default class AttributeSelector {
 
@@ -14,20 +14,33 @@ export default class AttributeSelector {
 	 * @param {HTMLElement} container
 	 * @param {SelectorState} state
 	 * @param {Function} labelFn - (attr: string) => string
+	 * @param {string} targetAttr - the fixed target-variable attribute key
 	 */
-	constructor(container, state, labelFn) {
+	constructor(container, state, labelFn, targetAttr) {
 		this._container = container;
 		this._state = state;
 		this._labelFn = labelFn;
-		this._offset = 0;       // index of first visible inactive attr
+		this._targetAttr = targetAttr;
+		this._offset = 0;
 		this._dragSrcIdx = null;
+		this._inactiveVisible = false;
+		this._layouts = null;
+		this._viewWidth = null;
+		this._svgMarginLeft = null;
 
 		state.on(() => {
-			// clamp offset — page size also changes when active count changes
-			const max = Math.max(0, this._state.getInactive().length - this._inactivePage());
+			const max = Math.max(0, this._state.getInactive().length - INACTIVE_PAGE);
 			this._offset = Math.min(this._offset, max);
 			this._render();
 		});
+		this._render();
+	}
+
+	/** Called after each chart render to align boxes with axis positions. */
+	updateLayouts({ layouts, viewWidth, svgMarginLeft }) {
+		this._layouts = layouts;
+		this._viewWidth = viewWidth;
+		this._svgMarginLeft = svgMarginLeft;
 		this._render();
 	}
 
@@ -37,89 +50,113 @@ export default class AttributeSelector {
 	_render() {
 		this._container.innerHTML = '';
 
-		const row = document.createElement('div');
-		row.className = 'attr-selector';
+		const panel = document.createElement('div');
+		panel.className = 'attr-selector-panel';
+		if (this._viewWidth !== null) {
+			panel.style.marginLeft = this._svgMarginLeft;
+			panel.style.width = `${this._viewWidth}px`;
+		}
 
-		row.append(
-			this._buildActiveGroup(),
-			this._buildDivider(),
-			this._buildInactiveNav(),
-		);
+		panel.appendChild(this._buildActiveRow());
+		if (this._inactiveVisible) {
+			panel.appendChild(this._buildInactiveRow());
+		}
+		panel.appendChild(this._buildToggle());
 
-		this._container.appendChild(row);
+		this._container.appendChild(panel);
 	}
 
-	_buildActiveGroup() {
-		const group = document.createElement('div');
-		group.className = 'attr-group attr-group--active';
+	_buildActiveRow() {
+		const row = document.createElement('div');
+		row.className = 'attr-active-row' + (this._inactiveVisible ? ' attr-active-row--open' : '');
+
+		const axisX = new Map();
+		if (this._layouts) {
+			for (const layout of this._layouts) axisX.set(layout.attr, layout.x);
+		}
 
 		this._state.getActive().forEach((attr, idx) => {
-			group.appendChild(this._buildBox(attr, idx));
+			row.appendChild(this._buildActiveBox(attr, idx, axisX.get(attr) ?? null));
 		});
 
-		return group;
+		const targetX = this._layouts ? this._layouts[this._layouts.length - 1].x : null;
+		row.appendChild(this._buildTargetBox(targetX));
+
+		return row;
 	}
 
-	_buildInactiveNav() {
-		const inactive    = this._state.getInactive();
-		const total       = inactive.length;
-		const inactivePage = this._inactivePage();
-		const page        = inactive.slice(this._offset, this._offset + inactivePage);
-		const atStart     = this._offset === 0;
-		const atEnd       = this._offset + inactivePage >= total;
+	_buildInactiveRow() {
+		const inactive = this._state.getInactive();
+		const total    = inactive.length;
+		const page     = inactive.slice(this._offset, this._offset + INACTIVE_PAGE);
+		const atStart  = this._offset === 0;
+		const atEnd    = this._offset + INACTIVE_PAGE >= total;
 
-		const nav = document.createElement('div');
-		nav.className = 'attr-nav';
+		const row = document.createElement('div');
+		row.className = 'attr-inactive-row';
 
 		const prevBtn = this._buildNavBtn('‹', !atStart, () => {
-			this._offset = Math.max(0, this._offset - inactivePage);
+			this._offset = Math.max(0, this._offset - INACTIVE_PAGE);
 			this._render();
 		});
 
 		const group = document.createElement('div');
-		group.className = 'attr-group attr-group--inactive';
+		group.className = 'attr-group--inactive';
 		page.forEach(attr => group.appendChild(this._buildInactiveBox(attr)));
 
 		const nextBtn = this._buildNavBtn('›', !atEnd, () => {
-			this._offset = Math.min(
-				Math.max(0, total - inactivePage),
-				this._offset + inactivePage,
-			);
+			this._offset = Math.min(Math.max(0, total - INACTIVE_PAGE), this._offset + INACTIVE_PAGE);
 			this._render();
 		});
 
-		nav.append(prevBtn, group, nextBtn);
-		return nav;
+		row.append(prevBtn, group, nextBtn);
+		return row;
 	}
 
-	// How many inactive boxes to show: fills the remaining slots up to TOTAL_VISIBLE.
-	_inactivePage() {
-		return Math.max(0, TOTAL_VISIBLE - this._state.getActive().length);
+	_buildToggle() {
+		const btn = document.createElement('button');
+		btn.className = 'attr-row-toggle';
+		btn.textContent = this._inactiveVisible ? '▲' : '▼';
+		btn.title = this._inactiveVisible ? 'Hide more attributes' : 'Show more attributes';
+		btn.addEventListener('click', () => {
+			this._inactiveVisible = !this._inactiveVisible;
+			this._render();
+		});
+		return btn;
 	}
 
-	_buildBox(attr, idx) {
+
+	// ── Box builders ──────────────────────────────────────────────────────────
+
+	_buildActiveBox(attr, idx, x) {
 		const isLast = this._state.isMinimal();
 
 		const box = document.createElement('div');
 		box.className = ['attr-box', 'attr-box--active', isLast ? 'attr-box--last' : '']
 			.filter(Boolean).join(' ');
 		box.textContent = this._labelFn(attr);
-		box.title = this._labelFn(attr);
+		box.title = isLast ? 'At least one attribute must remain active' : this._labelFn(attr);
 		box.dataset.attr = attr;
 		box.draggable = true;
 
-		if (isLast) {
-			box.title = 'At least one attribute must remain active';
-		} else {
-			box.addEventListener('click', () => this._state.toggle(attr));
-		}
+		if (x !== null) box.style.left = `${x}px`;
+		if (!isLast) box.addEventListener('click', () => this._state.toggle(attr));
 
-		box.addEventListener('dragstart',  e => this._onDragStart(e, idx));
-		box.addEventListener('dragover',   e => this._onDragOver(e, idx));
-		box.addEventListener('dragleave',  e => e.currentTarget.classList.remove('attr-box--drag-over'));
-		box.addEventListener('drop',       e => this._onDrop(e, idx));
-		box.addEventListener('dragend',    () => this._onDragEnd());
+		box.addEventListener('dragstart', e => this._onDragStart(e, idx));
+		box.addEventListener('dragover',  e => this._onDragOver(e, idx));
+		box.addEventListener('dragleave', e => e.currentTarget.classList.remove('attr-box--drag-over'));
+		box.addEventListener('drop',      e => this._onDrop(e, idx));
+		box.addEventListener('dragend',   () => this._onDragEnd());
 
+		return box;
+	}
+
+	_buildTargetBox(x) {
+		const box = document.createElement('div');
+		box.className = 'attr-box attr-box--target';
+		box.textContent = this._labelFn(this._targetAttr);
+		box.title = 'Target variable (fixed)';
+		if (x !== null) box.style.left = `${x}px`;
 		return box;
 	}
 
@@ -130,22 +167,11 @@ export default class AttributeSelector {
 		box.className = ['attr-box', 'attr-box--inactive', isDisabled ? 'attr-box--disabled' : '']
 			.filter(Boolean).join(' ');
 		box.textContent = this._labelFn(attr);
-		box.title = this._labelFn(attr);
+		box.title = isDisabled ? 'Remove an active attribute first (max 5)' : this._labelFn(attr);
 		box.dataset.attr = attr;
 
-		if (isDisabled) {
-			box.title = 'Remove an active attribute first (max 5)';
-		} else {
-			box.addEventListener('click', () => this._state.toggle(attr));
-		}
-
+		if (!isDisabled) box.addEventListener('click', () => this._state.toggle(attr));
 		return box;
-	}
-
-	_buildDivider() {
-		const d = document.createElement('div');
-		d.className = 'attr-divider';
-		return d;
 	}
 
 	_buildNavBtn(label, enabled, onClick) {
