@@ -1,5 +1,4 @@
 import { RibbonData } from '../utils.js';
-import { AXIS_HEIGHT } from '../layout.js';
 
 /**
  * Compute all ribbon geometries across all adjacent axis pairs.
@@ -11,9 +10,10 @@ import { AXIS_HEIGHT } from '../layout.js';
  * @param {AxisLayout[]} layouts - ordered axis layouts (output of computeLayouts)
  * @param {Object[]} samples - raw sample objects
  * @param {Function} colorFn - (leftAttr, leftValue, rightAttr, rightValue) => colorString
+ * @param {number} axisHeight - drawable height of each axis column in SVG units
  * @returns {RibbonData[]}
  */
-export function computeAllRibbons(layouts, samples, colorFn) {
+export function computeAllRibbons(layouts, samples, colorFn, axisHeight) {
 	if (layouts.length < 2) return [];
 
 	const allRibbons = [];
@@ -21,7 +21,7 @@ export function computeAllRibbons(layouts, samples, colorFn) {
 
 	for (let i = 0; i < layouts.length - 1; i++) {
 		const { ribbons, nextSampleGroups } = _computeRibbonPair(
-			layouts[i], layouts[i + 1], sampleGroups, samples.length, colorFn
+			layouts[i], layouts[i + 1], sampleGroups, samples.length, colorFn, axisHeight
 		);
 		allRibbons.push(...ribbons);
 		sampleGroups = nextSampleGroups;
@@ -34,7 +34,7 @@ export function computeAllRibbons(layouts, samples, colorFn) {
 // Compute ribbons for one adjacent pair of axes.
 // sampleGroups carries the filtered sample subsets from all prior axes so
 // ribbon heights reflect the full path taken, not just this pair.
-function _computeRibbonPair(leftLayout, rightLayout, sampleGroups, totalSamples, colorFn) {
+function _computeRibbonPair(leftLayout, rightLayout, sampleGroups, totalSamples, colorFn, axisHeight) {
 	const ribbons = [];
 	const nextSampleGroups = new Map();
 	const leftOffsets = _initOffsets(leftLayout);
@@ -54,7 +54,7 @@ function _computeRibbonPair(leftLayout, rightLayout, sampleGroups, totalSamples,
 				const count = leftFiltered.filter(s => s[rightLayout.attr] === rightNode.value).length;
 				if (count === 0) continue;
 
-				const height = (count / totalSamples) * AXIS_HEIGHT;
+				const height = (count / totalSamples) * axisHeight;
 				const leftY1 = leftNode.y + leftOffsets[leftNode.value];
 				const rightY1 = rightNode.y + rightOffsets[rightNode.value];
 				const ribbonKey = `${newPathKey}||${rightLayout.attr}:${rightNode.value}`;

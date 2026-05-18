@@ -72,7 +72,7 @@ export default class AttributeSelector {
 		nav.className = 'attr-nav';
 
 		const prevBtn = this._buildNavBtn('‹', !atStart, () => {
-			this._offset = Math.max(0, this._offset - INACTIVE_PAGE);
+			this._offset = Math.max(0, this._offset - inactivePage);
 			this._render();
 		});
 

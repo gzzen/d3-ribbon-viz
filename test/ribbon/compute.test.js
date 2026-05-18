@@ -1,16 +1,16 @@
 import { describe, it, expect } from 'vitest';
 import { computeAllRibbons } from '../../src/ribbon/compute.js';
-import { AXIS_HEIGHT } from '../../src/layout.js';
 import { AxisLayout, NodeLayout } from '../../src/utils.js';
 
 const colorFn = () => '#abc';
+const TEST_AXIS_HEIGHT = 350;
 
 // Build a minimal AxisLayout with two equal-height nodes starting at y=0.
 function makeAxis(attr, x, valueCountPairs) {
 	const total = valueCountPairs.reduce((s, [, c]) => s + c, 0);
 	let currY = 0;
 	const nodes = [...valueCountPairs].reverse().map(([value, count]) => {
-		const height = (count / total) * AXIS_HEIGHT;
+		const height = (count / total) * TEST_AXIS_HEIGHT;
 		const node = new NodeLayout(value, currY, height);
 		currY += height;
 		return node;
@@ -23,12 +23,12 @@ describe('computeAllRibbons', () => {
 	describe('edge cases', () => {
 		it('returns empty array when layouts has fewer than 2 entries', () => {
 			const layouts = [makeAxis('a', 0, [['v', 10]])];
-			expect(computeAllRibbons(layouts, [], colorFn)).toEqual([]);
+			expect(computeAllRibbons(layouts, [], colorFn, TEST_AXIS_HEIGHT)).toEqual([]);
 		});
 
 		it('returns empty array when sample list is empty', () => {
 			const layouts = [makeAxis('a', 0, [['v', 10]]), makeAxis('b', 100, [['v', 10]])];
-			expect(computeAllRibbons(layouts, [], colorFn)).toEqual([]);
+			expect(computeAllRibbons(layouts, [], colorFn, TEST_AXIS_HEIGHT)).toEqual([]);
 		});
 
 		it('skips value combinations with no matching samples', () => {
@@ -38,7 +38,7 @@ describe('computeAllRibbons', () => {
 			];
 			// all samples have a=x, b=p — no a=y or b=q samples
 			const samples = Array(5).fill({ a: 'x', b: 'p' });
-			const ribbons = computeAllRibbons(layouts, samples, colorFn);
+			const ribbons = computeAllRibbons(layouts, samples, colorFn, TEST_AXIS_HEIGHT);
 			expect(ribbons).toHaveLength(1);
 			expect(ribbons[0].leftValue).toBe('x');
 			expect(ribbons[0].rightValue).toBe('p');
@@ -59,19 +59,19 @@ describe('computeAllRibbons', () => {
 		];
 
 		it('generates one ribbon per non-empty cross-product', () => {
-			expect(computeAllRibbons(layouts, samples, colorFn)).toHaveLength(4);
+			expect(computeAllRibbons(layouts, samples, colorFn, TEST_AXIS_HEIGHT)).toHaveLength(4);
 		});
 
-		it('ribbon height is count/total * AXIS_HEIGHT', () => {
-			const ribbons = computeAllRibbons(layouts, samples, colorFn);
+		it('ribbon height is count/total * TEST_AXIS_HEIGHT', () => {
+			const ribbons = computeAllRibbons(layouts, samples, colorFn, TEST_AXIS_HEIGHT);
 			const loA = ribbons.find(r => r.leftValue === 'lo' && r.rightValue === 'A');
-			const expectedHeight = (4 / 10) * AXIS_HEIGHT;
+			const expectedHeight = (4 / 10) * TEST_AXIS_HEIGHT;
 			expect(loA.leftY2 - loA.leftY1).toBeCloseTo(expectedHeight);
 			expect(loA.rightY2 - loA.rightY1).toBeCloseTo(expectedHeight);
 		});
 
 		it('heights within a node stack without gap', () => {
-			const ribbons = computeAllRibbons(layouts, samples, colorFn);
+			const ribbons = computeAllRibbons(layouts, samples, colorFn, TEST_AXIS_HEIGHT);
 			// Both ribbons starting from 'hi' node
 			const hiRibbons = ribbons.filter(r => r.leftValue === 'hi')
 				.sort((a, b) => a.leftY1 - b.leftY1);
@@ -81,13 +81,13 @@ describe('computeAllRibbons', () => {
 		it('calls colorFn with correct attr/value arguments', () => {
 			const calls = [];
 			const trackingColorFn = (la, lv, ra, rv) => { calls.push({ la, lv, ra, rv }); return '#000'; };
-			computeAllRibbons(layouts, samples, trackingColorFn);
+			computeAllRibbons(layouts, samples, trackingColorFn, TEST_AXIS_HEIGHT);
 			expect(calls.length).toBe(4);
 			expect(calls.every(c => c.la === 'study' && c.ra === 'grade')).toBe(true);
 		});
 
 		it('uses colorFn return value as ribbon color', () => {
-			const ribbons = computeAllRibbons(layouts, samples, () => 'crimson');
+			const ribbons = computeAllRibbons(layouts, samples, () => 'crimson', TEST_AXIS_HEIGHT);
 			expect(ribbons.every(r => r.color === 'crimson')).toBe(true);
 		});
 	});
@@ -100,7 +100,7 @@ describe('computeAllRibbons', () => {
 		const samples = Array(10).fill({ a: '1', b: '2' });
 
 		it('key encodes left and right attr:value', () => {
-			const [ribbon] = computeAllRibbons(layouts, samples, colorFn);
+			const [ribbon] = computeAllRibbons(layouts, samples, colorFn, TEST_AXIS_HEIGHT);
 			expect(ribbon.key).toBe('a:1||b:2');
 		});
 
@@ -111,7 +111,7 @@ describe('computeAllRibbons', () => {
 				makeAxis('c', 200, [['3', 10]]),
 			];
 			const threeAxisSamples = Array(10).fill({ a: '1', b: '2', c: '3' });
-			const ribbons = computeAllRibbons(threeLayouts, threeAxisSamples, colorFn);
+			const ribbons = computeAllRibbons(threeLayouts, threeAxisSamples, colorFn, TEST_AXIS_HEIGHT);
 
 			// First pair: a:1||b:2
 			const ab = ribbons.find(r => r.leftAttr === 'a');
