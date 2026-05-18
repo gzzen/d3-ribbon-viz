@@ -60,10 +60,9 @@ export default class Legend {
 			.attr('width', panelWidth)
 			.attr('height', maxHeight + legendCfg.panelPadding * 2);
 
-		const svgRect = this.vis.node().getBoundingClientRect();
-		const legendX = (svgRect.width - panelWidth) / 2;
-		const legendY = svgRect.height - (maxHeight + legendCfg.panelPadding * 2) - 20;
-		this.legendGroup.attr('transform', `translate(${legendX}, ${legendY})`);
+		const svgWidth = +this.vis.attr('width');
+		const legendX = (svgWidth - panelWidth) / 2;
+		this.legendGroup.attr('transform', `translate(${legendX}, ${legendCfg.y})`);
 	}
 
 	_renderCategoricalLegend(col, attr, colorScale, startY) {

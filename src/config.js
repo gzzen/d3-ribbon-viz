@@ -21,8 +21,8 @@ export const viewport = {
 export const axis = {
 	marginLeftFraction:    0.065,  // left margin as fraction of SVG width
 	marginRightFraction:   0.065,  // right margin as fraction of SVG width
-	marginTopFraction:     0.045,  // top margin as fraction of SVG height
-	marginBottomFraction:  0.22,   // bottom margin (legend space) as fraction of SVG height
+	marginTopFraction:     0.28,   // top margin as fraction of SVG height (legend space)
+	marginBottomFraction:  0.05,   // bottom margin as fraction of SVG height
 	paddingInnerFraction:  0.055,  // inner top/bottom padding as fraction of SVG height
 	labelOffsetFraction:   0.018,  // axis label Y offset above axis column as fraction of SVG height
 	nodePadding: 0,                // gap between adjacent nodes, in SVG coordinate units
