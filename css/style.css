@@ -168,7 +168,7 @@ svg {
 /* attr-box em values are relative to this element's own font-size */
 .attr-box {
 	font-size: 0.7rem;
-	padding: 0.35em 0.9em;
+	padding: 0.35em 0.9em 0.35em 0.35em;
 	border-radius: 0.35em;
 	font-family: Arial, sans-serif;
 	white-space: nowrap;
@@ -185,6 +185,12 @@ svg {
 	background: var(--attr-box);
 	color: #fff;
 	cursor: grab;
+}
+
+.attr-box--active::before {
+	padding-right: 0.6em;
+	content: '⠿ ';
+	opacity: 0.6;
 }
 
 .attr-box--active:hover:not(.attr-box--last) {
