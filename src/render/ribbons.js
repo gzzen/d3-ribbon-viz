@@ -10,9 +10,10 @@ export default class RibbonRenderer {
 		this.ribbonGroup = vis.insert('g', '.node-group').attr('class', 'ribbon-group');
 	}
 
-	init(colorScales, layouts) {
+	init(colorScales, layouts, axisHeight) {
 		this.colorScales = colorScales;
 		this._layouts = layouts;
+		this._axisHeight = axisHeight;
 		this.render({});
 	}
 
@@ -28,7 +29,7 @@ export default class RibbonRenderer {
 		const colorFn = (la, lv, ra, rv) =>
 			d3.interpolate(this.colorScales[la](lv), this.colorScales[ra](rv))(0.5);
 
-		const allRibbons = computeAllRibbons(this._layouts, this.dataProcessor.samples, colorFn);
+		const allRibbons = computeAllRibbons(this._layouts, this.dataProcessor.samples, colorFn, this._axisHeight);
 
 		for (const ribbon of allRibbons) {
 			ribbon.isHighlighted = this._matchesSelection(ribbon, selection, isActive);

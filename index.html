@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Parallel Coordinates — Student Performance</title>
+    <title>Ribbon Visualization</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="data:;base64,iVBORwOKGO=" />
@@ -9,17 +9,39 @@
 </head>
 <body>
     <div class="container">
-        <h1>Student Performance Factors</h1>
+        <h1 class="chart-title">Ribbon Visualization Example <span>Student Performance Factors</span></h1>
         <div id="pc-view">
-            <div class="view-label view1">Pathways Between Student Characteristics and Final Grade</div>
         </div>
+        <div id="attr-selector"></div>
     </div>
 
     <script src="src/d3.v6.min.js"></script>
     <script type="module">
         import ParallelCoordsView from './src/view.js';
+        import SelectorState from './src/ui/selectorState.js';
+        import AttributeSelector from './src/ui/attributeSelector.js';
+        import * as metadata from './src/utils/metadata.js';
+        import { data } from './src/config.js';
+
         const pcView = new ParallelCoordsView('#pc-view');
-        pcView.init();
+        await pcView.init(); // metadata.init() is called inside; safe to use metadata after this
+
+        const allAttrs = metadata.getAllAttrs().filter(a => a !== data.targetAttr);
+        const selectorState = new SelectorState(allAttrs, data.defaultAttrs);
+
+        const selector = new AttributeSelector(
+            document.querySelector('#attr-selector'),
+            selectorState,
+            attr => metadata.getAttrLabel(attr),
+            data.targetAttr,
+        );
+
+        selector.syncToLayouts(pcView.lastLayouts, pcView.svgMarginLeft, pcView.svgWidth);
+
+        selectorState.on(() => {
+            pcView.update(selectorState.getActive());
+            selector.syncToLayouts(pcView.lastLayouts, pcView.svgMarginLeft, pcView.svgWidth);
+        });
     </script>
 </body>
 </html>

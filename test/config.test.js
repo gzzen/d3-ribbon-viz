@@ -12,17 +12,27 @@ describe('config', () => {
 			expect(Array.isArray(data.defaultAttrs)).toBe(true);
 			expect(data.defaultAttrs.length).toBeGreaterThan(0);
 		});
-		it('has a finalAttr string not in defaultAttrs', () => {
-			expect(data.finalAttr).toBeTypeOf('string');
-			expect(data.defaultAttrs).not.toContain(data.finalAttr);
+		it('has a targetAttr string not in defaultAttrs', () => {
+			expect(data.targetAttr).toBeTypeOf('string');
+			expect(data.defaultAttrs).not.toContain(data.targetAttr);
 		});
 	});
 
 	describe('viewport', () => {
-		it('has positive numeric dimensions', () => {
-			expect(viewport.height).toBeGreaterThan(0);
-			expect(viewport.rightPad).toBeGreaterThan(0);
-			expect(viewport.sidebarWidth).toBeGreaterThan(0);
+		it('heightFraction is between 0 and 1', () => {
+			expect(viewport.heightFraction).toBeGreaterThan(0);
+			expect(viewport.heightFraction).toBeLessThan(1);
+		});
+		it('rightPadFraction is between 0 and 1', () => {
+			expect(viewport.rightPadFraction).toBeGreaterThan(0);
+			expect(viewport.rightPadFraction).toBeLessThan(1);
+		});
+		it('sidebarFraction is between 0 and 1', () => {
+			expect(viewport.sidebarFraction).toBeGreaterThan(0);
+			expect(viewport.sidebarFraction).toBeLessThan(1);
+		});
+		it('fractions leave room for content', () => {
+			expect(viewport.rightPadFraction + viewport.sidebarFraction).toBeLessThan(1);
 		});
 		it('has svgWidthStyle and svgMarginLeft strings', () => {
 			expect(viewport.svgWidthStyle).toBeTypeOf('string');
@@ -31,20 +41,26 @@ describe('config', () => {
 	});
 
 	describe('axis', () => {
-		it('has all four margins as positive numbers', () => {
-			expect(axis.marginLeft).toBeGreaterThan(0);
-			expect(axis.marginRight).toBeGreaterThan(0);
-			expect(axis.marginTop).toBeGreaterThan(0);
-			expect(axis.marginBottom).toBeGreaterThan(0);
+		it('has all margin fractions as positive numbers between 0 and 1', () => {
+			expect(axis.marginLeftFraction).toBeGreaterThan(0);
+			expect(axis.marginLeftFraction).toBeLessThan(1);
+			expect(axis.marginRightFraction).toBeGreaterThan(0);
+			expect(axis.marginRightFraction).toBeLessThan(1);
+			expect(axis.marginTopFraction).toBeGreaterThan(0);
+			expect(axis.marginTopFraction).toBeLessThan(1);
+			expect(axis.marginBottomFraction).toBeGreaterThan(0);
+			expect(axis.marginBottomFraction).toBeLessThan(1);
 		});
-		it('has paddingInner and nodePadding as non-negative numbers', () => {
-			expect(axis.paddingInner).toBeGreaterThanOrEqual(0);
+		it('has paddingInnerFraction and nodePadding as non-negative numbers', () => {
+			expect(axis.paddingInnerFraction).toBeGreaterThanOrEqual(0);
 			expect(axis.nodePadding).toBeGreaterThanOrEqual(0);
 		});
 		it('inner axis height is positive given current config', () => {
-			const axisTop = axis.marginTop + axis.paddingInner;
-			const axisBottom = viewport.height - axis.marginBottom - axis.paddingInner;
-			expect(axisBottom - axisTop).toBeGreaterThan(0);
+			// axisTop = marginTopFraction + paddingInnerFraction
+			// axisBottom = 1 - marginBottomFraction - paddingInnerFraction
+			const axisTopFrac    = axis.marginTopFraction    + axis.paddingInnerFraction;
+			const axisBottomFrac = 1 - axis.marginBottomFraction - axis.paddingInnerFraction;
+			expect(axisBottomFrac - axisTopFrac).toBeGreaterThan(0);
 		});
 	});
 
