@@ -5,27 +5,30 @@ export const data = {
 	targetAttr: 'final_grade_levels',
 };
 
-// SVG viewport dimensions and CSS framing
-// Design width = window.innerWidth - viewport.rightPad - viewport.sidebarWidth
+// SVG viewport sizing — fractions of window dimensions
+// Design width  = window.innerWidth  × (1 - rightPadFraction - sidebarFraction)
+// Design height = window.innerHeight × heightFraction
 export const viewport = {
-	rightPad: 30,
-	sidebarWidth: 160,
-	height: 550,
-	svgWidthStyle: 'calc(100% - 150px)',
-	svgMarginLeft: '150px',
+	rightPadFraction:  0.02,   // right whitespace
+	sidebarFraction:   0.11,   // left sidebar / navigation
+	heightFraction:    0.60,   // SVG height relative to window height
+	// CSS strings derived from sidebarFraction so they stay consistent
+	get svgWidthStyle()  { return `calc(100% - ${this.sidebarFraction * 100}vw)`; },
+	get svgMarginLeft()  { return `${this.sidebarFraction * 100}vw`; },
 };
 
-// Axis layout geometry
+// Axis layout geometry — fractions of the SVG coordinate dimensions
 export const axis = {
-	marginLeft: 80,
-	marginRight: 80,
-	marginTop: 25,
-	marginBottom: 120,
-	paddingInner: 30,
-	nodePadding: 0,
+	marginLeftFraction:    0.065,  // left margin as fraction of SVG width
+	marginRightFraction:   0.065,  // right margin as fraction of SVG width
+	marginTopFraction:     0.045,  // top margin as fraction of SVG height
+	marginBottomFraction:  0.22,   // bottom margin (legend space) as fraction of SVG height
+	paddingInnerFraction:  0.055,  // inner top/bottom padding as fraction of SVG height
+	labelOffsetFraction:   0.018,  // axis label Y offset above axis column as fraction of SVG height
+	nodePadding: 0,                // gap between adjacent nodes, in SVG coordinate units
 };
 
-// Node visual constants
+// Node visual constants (SVG coordinate units — scale implicitly with viewBox)
 export const node = {
 	width: 20,
 	widthHovered: 30,
@@ -51,7 +54,7 @@ export const overlay = {
 	baseOpacity: 0.5,
 };
 
-// Legend layout and typography
+// Legend layout and typography (SVG coordinate units)
 export const legend = {
 	y: 20,
 	panelPadding: 10,
