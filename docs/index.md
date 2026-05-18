@@ -52,6 +52,9 @@ src/
       node.js           Node hover and click logic
       ribbon.js         Ribbon hover and click logic
       background.js     Background click handler
+  ui/
+    selectorState.js    Active/inactive attribute list state (max 5 active)
+    attributeSelector.js  Axis-aligned attribute picker with collapsible dropdown
 
 data/
   student-por-processed.csv    Source dataset
@@ -60,7 +63,7 @@ data/
 test/
   config.test.js
   layout.test.js
-  model/       utils/       ribbon/       interaction/
+  model/       utils/       ribbon/       interaction/       ui/
 ```
 
 ---

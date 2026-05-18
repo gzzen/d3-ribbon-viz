@@ -89,6 +89,27 @@ frozen (node selection or ribbon click)
 
 ---
 
+## Attribute selector
+
+The attribute selector strip sits above the SVG and lets users control which attributes are shown as axes.
+
+### Active row
+
+Each active attribute is displayed as a pill box absolutely positioned so its center aligns with the corresponding axis. Boxes support:
+
+- **Click** — deactivates the attribute (moves it to the inactive dropdown). The last remaining active attribute cannot be removed.
+- **Drag and drop** — reorders active attributes left-to-right; the visualization re-renders immediately on drop.
+
+### Inactive dropdown
+
+Inactive attributes live in a collapsible dropdown toggled by the **▼ Attributes** button. Clicking an inactive attribute moves it to the end of the active list. The dropdown items are disabled (greyed out) when the active list is already at its maximum of 5 attributes.
+
+### State
+
+`SelectorState` in [`src/ui/selectorState.js`](../src/ui/selectorState.js) owns the ordered active list and enforces the `MAX_ACTIVE = 5` cap and the at-least-one invariant. It emits via `on`/`off` (no event name needed). `AttributeSelector` subscribes and re-renders the DOM on every change, then calls `syncToLayouts` to realign box positions after the SVG updates.
+
+---
+
 ## Implementation
 
 All mutable interaction state lives in [`src/interaction/state.js`](../src/interaction/state.js) (`InteractionState`). The `OverlayRenderer` in [`src/interaction/overlay.js`](../src/interaction/overlay.js) applies visual changes but holds no state of its own. This separation means the logic can be unit-tested without a DOM.

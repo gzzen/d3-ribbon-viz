@@ -24,6 +24,7 @@ The test framework is [Vitest](https://vitest.dev/). All test files are ES modul
 | `test/utils/metadata.test.js` | `src/utils/metadata.js` | `init()` fetches URL, throws before init, all five lookup functions after init |
 | `test/model/DataLoader.test.js` | `src/model/DataLoader.js` | CSV loading, ID injection, `idColumn` and `generateId` strategies |
 | `test/model/DataProcessor.test.js` | `src/model/DataProcessor.js` | Node frequency computation, joint frequency computation, sample filtering with AND/OR selection logic |
+| `test/ui/selectorState.test.js` | `src/ui/selectorState.js` | Initial state, toggle/activate/deactivate, MAX_ACTIVE cap, reorder, at-least-one invariant, `isFull`/`isMinimal`, `on`/`off` event system |
 
 ---
 

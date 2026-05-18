@@ -37,7 +37,7 @@ data/*.csv ────────── loadCSV() ──→ DataProcessor ─�
 
 | Module | Responsibility |
 |--------|---------------|
-| `layout.js` | Pure function `computeLayouts(attrs, freqMap, viewWidth) → AxisLayout[]`. No DOM, no D3. Takes explicit viewport width so it can be tested without `window`. |
+| `layout.js` | Pure function `computeLayouts(attrs, freqMap, viewWidth, viewHeight) → { layouts, axisHeight, axisTop, axisBottom, labelY }`. No DOM, no D3. Takes explicit viewport dimensions so it can be tested without `window`. |
 | `ribbon/compute.js` | Pure function `computeAllRibbons(layouts, samples, colorFn) → RibbonData[]`. Implements the stacking algorithm; `colorFn` is injected so the algorithm contains no D3. |
 | `ribbon/keys.js` | Key encoding, parsing, and matching. The string format `"attr:val||attr:val"` is the only representation of a ribbon's full axis path — all logic that touches keys lives here. |
 
@@ -47,10 +47,17 @@ All four renderers take pre-computed data and write to the SVG. None of them own
 
 | Module | Input | Output |
 |--------|-------|--------|
-| `render/axes.js` | `AxisLayout[]` | Axis lines + labels |
+| `render/axes.js` | `AxisLayout[]` | Axis lines |
 | `render/nodes.js` | `AxisLayout[]`, selection | Coloured node rectangles |
 | `render/ribbons.js` | `AxisLayout[]`, color scales | Bezier ribbon paths |
 | `render/legend.js` | `AxisLayout[]` | Legend panel (swatches / gradient bars) |
+
+### UI
+
+| Module | Responsibility |
+|--------|---------------|
+| `ui/selectorState.js` | Manages the ordered list of active attributes (max `MAX_ACTIVE = 5`). Exposes `toggle`, `activate`, `deactivate`, `reorder`. Emits via `on`/`off`. No DOM access. |
+| `ui/attributeSelector.js` | Renders the active-attribute row (absolutely positioned boxes aligned to axis x-coordinates) and the collapsible inactive-attribute dropdown. Reacts to `SelectorState` changes and syncs box positions after each render via `syncToLayouts`. Supports drag-and-drop reordering. |
 
 ### Interaction
 
@@ -80,11 +87,11 @@ All four renderers take pre-computed data and write to the SVG. None of them own
 `ParallelCoordsView.render()` is the only entry point that kicks off a full re-render:
 
 1. Build `freqMap` from `DataProcessor`
-2. `computeLayouts(attrs, freqMap, viewWidth)` — pure, no side effects
+2. `computeLayouts(attrs, freqMap, viewWidth, viewHeight)` — pure, no side effects
 3. `axisRenderer.render(layouts)` — SVG axes
 4. `legend.init/update(layouts)` — SVG legend
 5. `nodeRenderer.init(layouts)` — builds color scales, renders nodes
-6. `ribbonRenderer.init(colorScales, layouts)` — runs stacking algorithm, renders ribbons
+6. `ribbonRenderer.init(colorScales, layouts, axisHeight)` — runs stacking algorithm, renders ribbons
 
 Between full renders, `InteractionState` changes trigger only `nodeRenderer.update(selection)` — a lightweight pass that re-applies fill/stroke to existing nodes.
 
@@ -110,5 +117,7 @@ view.js
   ├─ interaction/tooltip.js ────── ribbon/keys.js
   ├─ handlers/node.js ─────────── ribbon/keys.js
   ├─ handlers/ribbon.js ────────── interaction/tooltip.js
-  └─ handlers/background.js       (no internal deps)
+  ├─ handlers/background.js       (no internal deps)
+  ├─ ui/selectorState.js          (no internal deps)
+  └─ ui/attributeSelector.js ──── ui/selectorState.js
 ```
