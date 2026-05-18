@@ -30,14 +30,13 @@ export default class ParallelCoordsView {
 		const samples = await loadCSV(data.csvPath, { idColumn: 'id' });
 		this.dataProcessor = new DataProcessor(samples);
 
-		const viewWidth  = Math.round(window.innerWidth  * (1 - viewport.rightPadFraction - viewport.sidebarFraction));
-		const viewHeight = Math.round(window.innerHeight * viewport.heightFraction);
+		this._viewWidth  = Math.round(window.innerWidth  * (1 - viewport.rightPadFraction - viewport.sidebarFraction));
+		this._viewHeight = Math.round(window.innerHeight * viewport.heightFraction);
 
 		const svg = d3.select(this.containerSelector)
 			.append('svg')
-			.attr('viewBox', `0 0 ${viewWidth} ${viewHeight}`)
-			.style('width', viewport.svgWidthStyle)
-			.style('height', 'auto')
+			.attr('width', this._viewWidth)
+			.attr('height', this._viewHeight)
 			.style('margin-left', viewport.svgMarginLeft);
 
 		this.axisRenderer = new AxisRenderer(svg);
@@ -84,10 +83,8 @@ export default class ParallelCoordsView {
 			freqMap.set(attr, this.dataProcessor.computeNodeFrequencies(attr));
 		}
 
-		const viewWidth  = Math.round(window.innerWidth  * (1 - viewport.rightPadFraction - viewport.sidebarFraction));
-		const viewHeight = Math.round(window.innerHeight * viewport.heightFraction);
 		const { layouts, axisHeight, axisTop, axisBottom, labelY } = computeLayouts(
-			this.displayAttrs, freqMap, viewWidth, viewHeight
+			this.displayAttrs, freqMap, this._viewWidth, this._viewHeight
 		);
 
 		this.axisRenderer.render(layouts, { axisTop, axisBottom, labelY });
