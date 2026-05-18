@@ -55,86 +55,51 @@ svg {
 
 /* ── Attribute selector ───────────────────────────────────────────────────── */
 
-/* Outer container — reserves space for the toggle tag that hangs below */
-#attr-selector {
-	padding-bottom: 1.5rem;
-	margin-top: 0.5rem;
-}
-
-/* Panel: width + margin-left set via JS to align with SVG */
-.attr-selector-panel {
-	position: relative;
-}
-
-/* Active row: fixed height, boxes absolutely centred on axis positions */
-.attr-active-row {
-	position: relative;
-	height: 2.5rem;
-	background: #f4f4f6;
-	border: 1px solid #d8d8e4;
-	border-radius: 6px;
-	overflow: visible;
-}
-
-/* Flatten bottom border when inactive row is attached below */
-.attr-active-row--open {
-	border-bottom-color: transparent;
-	border-radius: 6px 6px 0 0;
-}
-
-/* Boxes in the active row are absolutely positioned at their axis X */
-.attr-active-row .attr-box {
-	position: absolute;
-	top: 50%;
-	transform: translate(-50%, -50%);
-}
-
-/* Inactive row: flex strip below the active row */
-.attr-inactive-row {
+.attr-selector {
 	display: flex;
 	align-items: center;
-	gap: 0.4rem;
-	padding: 0.35rem 0.75rem;
-	background: #f4f4f6;
-	border: 1px solid #d8d8e4;
-	border-top: none;
-	border-radius: 0 0 6px 6px;
+	flex-wrap: nowrap;
+	width: fit-content;
+	margin: 0 auto;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid #e0e0e6;
+	border-radius: 1em;
+	background: #574964;
+	min-height: 2.75rem;
+	overflow: hidden; /* row is fixed — no scrolling */
 }
 
-/* inactive group: sits between the two nav buttons */
+/* active group: fixed, never shrinks */
+.attr-group--active {
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+	flex-shrink: 0;
+}
+
+/* inactive group: sits inside the nav between the two buttons */
 .attr-group--inactive {
 	display: flex;
 	align-items: center;
 	gap: 0.35rem;
-	flex: 1;
-	flex-wrap: wrap;
 }
 
-/* Tag-shaped toggle button — hangs off the bottom edge of the panel */
-.attr-row-toggle {
-	position: absolute;
-	bottom: 0;
-	left: 50%;
-	transform: translateX(-50%) translateY(100%);
-	width: 28px;
-	height: 22px;
-	padding: 3px 0 0 0;
-	clip-path: polygon(0% 0%, 100% 0%, 100% 62%, 50% 100%, 0% 62%);
-	background: #c4c4d0;
-	border: none;
-	cursor: pointer;
-	color: #444;
-	font-size: 9px;
-	line-height: 1;
+/* navigation shell for the inactive section: fills remaining row width */
+.attr-nav {
 	display: flex;
-	align-items: flex-start;
-	justify-content: center;
-	transition: background 0.1s;
-	filter: drop-shadow(0 2px 2px rgba(0,0,0,0.18));
+	align-items: center;
+	gap: 0.4rem;
+	flex: 1;
+	min-width: 0;
 }
 
-.attr-row-toggle:hover {
-	background: #a8a8bc;
+/* vertical rule between active and inactive groups */
+.attr-divider {
+	width: 1px;
+	height: 1.4rem;
+	background: #c8c8d0;
+	margin: 0 1.5rem;
+	flex-shrink: 0;
 }
 
 /* prev / next paging buttons — em values are relative to this element's font-size */
@@ -218,14 +183,6 @@ svg {
 	color: #b0b0b8;
 	border-color: #e8e8ec;
 	cursor: not-allowed;
-}
-
-/* target variable: fixed, non-removable, visually distinct */
-.attr-box--target {
-	background: #1a4a2e;
-	color: #8ee0a8;
-	border-color: #3a8a50;
-	cursor: default;
 }
 
 /* drag states */

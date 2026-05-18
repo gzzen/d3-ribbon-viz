@@ -10,8 +10,9 @@
 <body>
     <div class="container">
         <h1>Student Performance Factors</h1>
-        <div id="pc-view"></div>
         <div id="attr-selector"></div>
+        <div id="pc-view">
+        </div>
     </div>
 
     <script src="src/d3.v6.min.js"></script>
@@ -28,19 +29,13 @@
         const allAttrs = metadata.getAllAttrs().filter(a => a !== data.targetAttr);
         const selectorState = new SelectorState(allAttrs, data.defaultAttrs);
 
-        const attrSelector = new AttributeSelector(
+        new AttributeSelector(
             document.querySelector('#attr-selector'),
             selectorState,
             attr => metadata.getAttrLabel(attr),
-            data.targetAttr,
         );
 
-        attrSelector.updateLayouts(pcView.getLayoutInfo());
-
-        selectorState.on(() => {
-            pcView.update(selectorState.getActive());
-            attrSelector.updateLayouts(pcView.getLayoutInfo());
-        });
+        selectorState.on(() => pcView.update(selectorState.getActive()));
     </script>
 </body>
 </html>
